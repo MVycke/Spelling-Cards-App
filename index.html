@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en-AU">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -78,7 +77,8 @@
       cursor: not-allowed;
     }
 
-    input {
+    input,
+    select {
       font-size: 18px;
       padding: 12px;
       border-radius: 10px;
@@ -160,7 +160,7 @@
     }
 
     .content {
-      max-width: 1100px;
+      max-width: 1050px;
       margin: 0 auto;
     }
 
@@ -191,6 +191,10 @@
       flex-wrap: wrap;
     }
 
+    .game-row button {
+      min-width: 130px;
+    }
+
     .word-box {
       border: 2px solid #d7e1ea;
       border-radius: 16px;
@@ -215,7 +219,7 @@
     }
 
     .field {
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .field label {
@@ -224,20 +228,13 @@
       margin-bottom: 8px;
     }
 
-    .card-editor {
-      display: grid;
-      grid-template-columns: minmax(180px, 1fr) minmax(420px, 1.4fr) auto;
-      gap: 10px;
-      align-items: start;
-      margin-bottom: 12px;
-    }
-
+    .card-editor,
     .add-card-row {
       display: grid;
-      grid-template-columns: minmax(180px, 1fr) minmax(420px, 1.4fr) auto;
-      gap: 10px;
-      align-items: start;
-      margin-top: 12px;
+      grid-template-columns: 1fr 330px auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
     }
 
     .sound-card {
@@ -271,43 +268,50 @@
       background: #c8a7ef;
     }
 
-    /* COLOUR PICKER */
+    /*
+      COLOURED DROPDOWN
 
-    .colour-picker {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(90px, 1fr));
-      gap: 6px;
+      The background colour shows which colour is selected.
+      The text inside shows the custom meaning.
+    */
+
+    .colour-select {
       width: 100%;
-    }
-
-    .colour-choice {
-      min-height: 54px;
-      border-radius: 12px;
-      border: 3px solid transparent;
-      padding: 7px 8px;
-      font-size: 14px;
-      line-height: 1.15;
+      min-height: 52px;
       font-weight: bold;
       color: #172033;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      border: 2px solid rgba(24,49,83,0.22);
       cursor: pointer;
     }
 
-    .colour-choice:hover {
-      transform: translateY(-1px);
+    .colour-select.green {
+      background: #9be39f;
     }
 
-    .colour-choice.selected {
-      border-color: #183153;
-      box-shadow: 0 0 0 2px white inset;
+    .colour-select.blue {
+      background: #91c9f7;
     }
 
-    .colour-choice.selected::before {
-      content: "✓ ";
-      font-weight: bold;
+    .colour-select.yellow {
+      background: #ffe47a;
+    }
+
+    .colour-select.purple {
+      background: #c8a7ef;
+    }
+
+    .colour-select.pink {
+      background: #f5a6c8;
+    }
+
+    /*
+      Dropdown options themselves are kept simple because
+      browsers display dropdown menus differently.
+    */
+
+    .colour-select option {
+      background: white;
+      color: #172033;
     }
 
     .colour-meaning-row {
@@ -462,6 +466,7 @@
       border: 2px dashed transparent;
       border-radius: 16px;
       padding: 10px;
+      transition: 0.2s;
     }
 
     .picture-editor.dragging {
@@ -549,19 +554,13 @@
       align-items: center;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 800px) {
 
       .card-editor,
-      .add-card-row {
+      .add-card-row,
+      .colour-meaning-row {
         grid-template-columns: 1fr;
       }
-
-      .colour-picker {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 700px) {
 
       h1 {
         font-size: 40px;
@@ -578,10 +577,6 @@
       button {
         font-size: 18px;
       }
-
-      .colour-meaning-row {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 </head>
@@ -591,7 +586,8 @@
 
   <!-- HOME -->
 
-  <main id="homeScreen" class="screen home">
+  <main id="homeScreen"
+        class="screen home">
 
     <h1>🔤 SPELLING CARDS</h1>
 
@@ -765,7 +761,7 @@
         <h3>Colour Meanings</h3>
 
         <p class="small">
-          These meanings will appear inside the coloured card-choice buttons.
+          These names will appear inside the coloured dropdowns.
         </p>
 
         <div id="colourMeaningInputs"></div>
@@ -785,7 +781,7 @@
   </section>
 
 
-  <!-- EDITOR -->
+  <!-- GAME EDITOR -->
 
   <section id="editorScreen"
            class="screen hidden">
@@ -979,6 +975,7 @@
 
       <h2>How to Setup &amp; Play</h2>
 
+
       <div class="help-tabs">
 
         <button id="childTab"
@@ -1051,7 +1048,7 @@
 
         <div class="help-step">
           <strong>5. Choose colours</strong><br>
-          Tap the coloured block that matches the purpose of each card.
+          Use the coloured dropdown to choose what each sound card represents.
         </div>
 
         <div class="help-step">
@@ -1071,15 +1068,13 @@
   </section>
 
 
-
 <script>
 
-  /* ==============================
-     HELPERS
-  ============================== */
+  /* =========================
+     BASIC HELPERS
+  ========================= */
 
   function makeId(prefix) {
-
     return (
       prefix +
       '-' +
@@ -1093,7 +1088,6 @@
 
 
   function capitalise(text) {
-
     return (
       text.charAt(0).toUpperCase()
       +
@@ -1103,10 +1097,7 @@
 
 
   function escapeHtml(text) {
-
-    return String(
-      text ?? ''
-    )
+    return String(text ?? '')
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
       .replaceAll('>', '&gt;')
@@ -1116,7 +1107,6 @@
 
 
   function escapeAttribute(text) {
-
     return escapeHtml(text);
   }
 
@@ -1124,7 +1114,6 @@
   function shuffleArray(array) {
 
     const copy = [...array];
-
 
     for (
       let i = copy.length - 1;
@@ -1138,7 +1127,6 @@
           (i + 1)
         );
 
-
       [
         copy[i],
         copy[j]
@@ -1150,15 +1138,14 @@
       ];
     }
 
-
     return copy;
   }
 
 
 
-  /* ==============================
+  /* =========================
      MEDIA DATABASE
-  ============================== */
+  ========================= */
 
   const MEDIA_DB_NAME =
     'SpellingCardsMedia';
@@ -1403,11 +1390,7 @@
   }
 
 
-  function saveImageBlob(
-    wordId,
-    blob
-  ) {
-
+  function saveImageBlob(wordId, blob) {
     return putMediaBlob(
       IMAGE_STORE,
       wordId,
@@ -1416,10 +1399,7 @@
   }
 
 
-  function getImageBlob(
-    wordId
-  ) {
-
+  function getImageBlob(wordId) {
     return getMediaBlob(
       IMAGE_STORE,
       wordId
@@ -1427,10 +1407,7 @@
   }
 
 
-  function deleteImageBlob(
-    wordId
-  ) {
-
+  function deleteImageBlob(wordId) {
     return deleteMediaBlob(
       IMAGE_STORE,
       wordId
@@ -1438,11 +1415,7 @@
   }
 
 
-  function saveAudioBlob(
-    wordId,
-    blob
-  ) {
-
+  function saveAudioBlob(wordId, blob) {
     return putMediaBlob(
       AUDIO_STORE,
       wordId,
@@ -1451,10 +1424,7 @@
   }
 
 
-  function getAudioBlob(
-    wordId
-  ) {
-
+  function getAudioBlob(wordId) {
     return getMediaBlob(
       AUDIO_STORE,
       wordId
@@ -1462,10 +1432,7 @@
   }
 
 
-  function deleteAudioBlob(
-    wordId
-  ) {
-
+  function deleteAudioBlob(wordId) {
     return deleteMediaBlob(
       AUDIO_STORE,
       wordId
@@ -1474,9 +1441,9 @@
 
 
 
-  /* ==============================
+  /* =========================
      MEDIA DISPLAY
-  ============================== */
+  ========================= */
 
   const mediaObjectUrls =
     new Map();
@@ -1523,7 +1490,6 @@
 
 
     if (!element) {
-
       return false;
     }
 
@@ -1547,7 +1513,6 @@
 
 
       if (!blob) {
-
         return false;
       }
 
@@ -1577,10 +1542,7 @@
 
     } catch (error) {
 
-      console.error(
-        error
-      );
-
+      console.error(error);
 
       return false;
     }
@@ -1599,7 +1561,6 @@
 
 
     if (!element) {
-
       return false;
     }
 
@@ -1618,7 +1579,6 @@
 
 
       if (!blob) {
-
         return false;
       }
 
@@ -1643,10 +1603,7 @@
 
     } catch (error) {
 
-      console.error(
-        error
-      );
-
+      console.error(error);
 
       return false;
     }
@@ -1667,7 +1624,6 @@
       !audio ||
       !audio.src
     ) {
-
       return;
     }
 
@@ -1678,20 +1634,16 @@
 
     audio.play()
       .catch(
-        error => {
-
-          console.error(
-            error
-          );
-        }
+        error =>
+          console.error(error)
       );
   }
 
 
 
-  /* ==============================
+  /* =========================
      IMAGE RESIZING
-  ============================== */
+  ========================= */
 
   function resizeImageFile(file) {
 
@@ -1737,13 +1689,15 @@
 
                   width =
                     Math.round(
-                      width * scale
+                      width *
+                      scale
                     );
 
 
                   height =
                     Math.round(
-                      height * scale
+                      height *
+                      scale
                     );
                 }
 
@@ -1804,7 +1758,7 @@
 
                 reject(
                   new Error(
-                    'The picture could not be opened.'
+                    'Picture could not be opened.'
                   )
                 );
               };
@@ -1833,9 +1787,9 @@
 
 
 
-  /* ==============================
-     COLOUR MEANINGS
-  ============================== */
+  /* =========================
+     COLOUR SETTINGS
+  ========================= */
 
   const colourOptions = [
     'green',
@@ -1892,6 +1846,29 @@
       JSON.stringify(
         colourMeanings
       )
+    );
+  }
+
+
+  function colourLabel(colour) {
+
+    const meaning =
+      colourMeanings[
+        colour
+      ];
+
+
+    if (
+      meaning &&
+      meaning.trim()
+    ) {
+
+      return meaning;
+    }
+
+
+    return capitalise(
+      colour
     );
   }
 
@@ -1989,255 +1966,58 @@
   }
 
 
-
-  /* ==============================
-     COLOURED CHOICE BUTTONS
-  ============================== */
-
-  function colourLabel(
-    colour
-  ) {
-
-    const meaning =
-      colourMeanings[
-        colour
-      ];
-
-
-    if (
-      meaning &&
-      meaning.trim()
-    ) {
-
-      return meaning;
-    }
-
-
-    return capitalise(
-      colour
-    );
-  }
-
-
-  function renderExistingColourPicker(
-    selected,
-    wordIndex,
-    type,
-    cardIndex
-  ) {
-
-    const pickerId =
-      `picker-${type}-${wordIndex}-${cardIndex}`;
-
-
-    return `
-
-      <div
-        class="colour-picker"
-        id="${pickerId}">
-
-        ${
-          colourOptions.map(
-            colour => `
-
-              <button
-                type="button"
-                class="colour-choice ${colour} ${
-                  colour === selected
-                  ? 'selected'
-                  : ''
-                }"
-
-                data-colour="${colour}"
-
-                onclick="
-                  chooseExistingCardColour(
-                    '${pickerId}',
-                    ${wordIndex},
-                    '${type}',
-                    ${cardIndex},
-                    '${colour}'
-                  )
-                ">
-
-                ${escapeHtml(
-                  colourLabel(
-                    colour
-                  )
-                )}
-
-              </button>
-
-            `
-          ).join('')
-        }
-
-      </div>
-
-    `;
-  }
-
-
-  function renderNewColourPicker(
-    wordIndex,
-    type,
+  function renderColourOptions(
     selected = 'green'
   ) {
 
-    const pickerId =
-      `new-picker-${type}-${wordIndex}`;
+    return colourOptions.map(
+      colour => `
 
-
-    return `
-
-      <div>
-
-        <input
-          type="hidden"
-          id="new-${type}-colour-${wordIndex}"
-          value="${selected}">
-
-
-        <div
-          class="colour-picker"
-          id="${pickerId}">
-
+        <option
+          value="${colour}"
           ${
-            colourOptions.map(
-              colour => `
+            colour === selected
+            ?
+            'selected'
+            :
+            ''
+          }>
 
-                <button
-                  type="button"
-                  class="colour-choice ${colour} ${
-                    colour === selected
-                    ? 'selected'
-                    : ''
-                  }"
+          ${escapeHtml(
+            colourLabel(colour)
+          )}
 
-                  data-colour="${colour}"
+        </option>
 
-                  onclick="
-                    chooseNewCardColour(
-                      '${pickerId}',
-                      'new-${type}-colour-${wordIndex}',
-                      '${colour}'
-                    )
-                  ">
-
-                  ${escapeHtml(
-                    colourLabel(
-                      colour
-                    )
-                  )}
-
-                </button>
-
-              `
-            ).join('')
-          }
-
-        </div>
-
-      </div>
-
-    `;
+      `
+    ).join('');
   }
 
 
-  function updatePickerHighlight(
-    pickerId,
-    colour
+  function updateColourSelectStyle(
+    select
   ) {
 
-    const picker =
-      document.getElementById(
-        pickerId
-      );
+    colourOptions.forEach(
+      colour => {
 
-
-    if (!picker) {
-
-      return;
-    }
-
-
-    picker
-      .querySelectorAll(
-        '.colour-choice'
-      )
-      .forEach(
-        button => {
-
-          button.classList.toggle(
-            'selected',
-            button.dataset.colour ===
-              colour
-          );
-        }
-      );
-  }
-
-
-  function chooseExistingCardColour(
-    pickerId,
-    wordIndex,
-    type,
-    cardIndex,
-    colour
-  ) {
-
-    games[
-      currentGameIndex
-    ]
-    .words[
-      wordIndex
-    ][type][
-      cardIndex
-    ]
-    .colour =
-      colour;
-
-
-    saveGames();
-
-
-    updatePickerHighlight(
-      pickerId,
-      colour
+        select.classList.remove(
+          colour
+        );
+      }
     );
-  }
 
 
-  function chooseNewCardColour(
-    pickerId,
-    inputId,
-    colour
-  ) {
-
-    const input =
-      document.getElementById(
-        inputId
-      );
-
-
-    if (input) {
-
-      input.value =
-        colour;
-    }
-
-
-    updatePickerHighlight(
-      pickerId,
-      colour
+    select.classList.add(
+      select.value
     );
   }
 
 
 
-  /* ==============================
+  /* =========================
      SAVED GAMES
-  ============================== */
+  ========================= */
 
   let games =
     JSON.parse(
@@ -2447,7 +2227,6 @@
               'game'
             );
 
-
           changed =
             true;
         }
@@ -2463,7 +2242,6 @@
                   'word'
                 );
 
-
               changed =
                 true;
             }
@@ -2477,7 +2255,6 @@
               word.hint =
                 '';
 
-
               changed =
                 true;
             }
@@ -2488,7 +2265,6 @@
 
 
     if (changed) {
-
       saveGames();
     }
   }
@@ -2498,64 +2274,48 @@
 
 
 
-  /* ==============================
+  /* =========================
      APP STATE
-  ============================== */
+  ========================= */
 
-  let currentGameIndex =
-    0;
+  let currentGameIndex = 0;
 
-  let currentPreviewWordIndex =
-    0;
+  let currentPreviewWordIndex = 0;
 
-  let previewSelected =
-    [];
+  let previewSelected = [];
 
-  let childWordIndex =
-    0;
+  let childWordIndex = 0;
 
-  let childSelected =
-    [];
+  let childSelected = [];
 
-  let childAttempts =
-    0;
+  let childAttempts = 0;
 
-  let childWordFinished =
-    false;
+  let childWordFinished = false;
 
-  let currentGameResults =
-    [];
+  let currentGameResults = [];
 
 
-  let activeRecorder =
-    null;
+  let activeRecorder = null;
 
-  let activeRecordingStream =
-    null;
+  let activeRecordingStream = null;
 
-  let activeRecordingChunks =
-    [];
+  let activeRecordingChunks = [];
 
-  let activeRecordingWordId =
-    null;
+  let activeRecordingWordId = null;
 
-  let activeRecordingWordIndex =
-    null;
+  let activeRecordingWordIndex = null;
 
-  let recordingSeconds =
-    0;
+  let recordingSeconds = 0;
 
-  let recordingInterval =
-    null;
+  let recordingInterval = null;
 
-  let recordingTimeout =
-    null;
+  let recordingTimeout = null;
 
 
 
-  /* ==============================
+  /* =========================
      NAVIGATION
-  ============================== */
+  ========================= */
 
   function showScreen(
     screenId
@@ -2590,16 +2350,15 @@
 
 
 
-  /* ==============================
+  /* =========================
      HELP
-  ============================== */
+  ========================= */
 
   function openHelp() {
 
     showScreen(
       'helpScreen'
     );
-
 
     showChildHelp();
   }
@@ -2676,14 +2435,13 @@
 
 
 
-  /* ==============================
+  /* =========================
      PLAY LIST
-  ============================== */
+  ========================= */
 
   function openPlayList() {
 
     renderPlayGameList();
-
 
     showScreen(
       'playScreen'
@@ -2700,13 +2458,11 @@
 
 
     if (
-      games.length ===
-      0
+      games.length === 0
     ) {
 
       container.innerHTML =
         '<div class="card">No spelling games have been created yet.</div>';
-
 
       return;
     }
@@ -2750,9 +2506,9 @@
 
 
 
-  /* ==============================
+  /* =========================
      CHILD PLAY
-  ============================== */
+  ========================= */
 
   function startChildGame(
     gameIndex
@@ -2762,14 +2518,12 @@
       games[
         gameIndex
       ]
-      .words.length ===
-      0
+      .words.length === 0
     ) {
 
       alert(
         'This game does not have any words yet.'
       );
-
 
       return;
     }
@@ -2810,16 +2564,11 @@
       ];
 
 
-    childSelected =
-      [];
+    childSelected = [];
 
+    childAttempts = 0;
 
-    childAttempts =
-      0;
-
-
-    childWordFinished =
-      false;
+    childWordFinished = false;
 
 
     document.getElementById(
@@ -2992,7 +2741,6 @@
             if (
               childWordFinished
             ) {
-
               return;
             }
 
@@ -3065,7 +2813,6 @@
             if (
               childWordFinished
             ) {
-
               return;
             }
 
@@ -3100,7 +2847,6 @@
     if (
       childWordFinished
     ) {
-
       return;
     }
 
@@ -3139,13 +2885,11 @@
 
 
     if (
-      chosen ===
-      expected
+      chosen === expected
     ) {
 
       const tries =
-        childAttempts +
-        1;
+        childAttempts + 1;
 
 
       feedback.textContent =
@@ -3171,7 +2915,6 @@
 
       finishChildWord();
 
-
       return;
     }
 
@@ -3180,8 +2923,7 @@
 
 
     if (
-      childAttempts ===
-      1
+      childAttempts === 1
     ) {
 
       feedback.textContent =
@@ -3327,8 +3069,7 @@
 
     if (
       childWordIndex <
-      game.words.length -
-      1
+      game.words.length - 1
     ) {
 
       childWordIndex++;
@@ -3336,13 +3077,11 @@
 
       renderChildWord();
 
-
       return;
     }
 
 
     saveCurrentResults();
-
 
     renderResults();
 
@@ -3354,9 +3093,9 @@
 
 
 
-  /* ==============================
+  /* =========================
      RESULTS
-  ============================== */
+  ========================= */
 
   function saveCurrentResults() {
 
@@ -3392,7 +3131,6 @@
 
     renderResults();
 
-
     showScreen(
       'resultsScreen'
     );
@@ -3418,8 +3156,7 @@
     if (
       !saved ||
       !saved.results ||
-      saved.results.length ===
-      0
+      saved.results.length === 0
     ) {
 
       container.innerHTML = `
@@ -3429,7 +3166,6 @@
         </div>
 
       `;
-
 
       return;
     }
@@ -3486,13 +3222,11 @@
         <table class="result-table">
 
           <thead>
-
             <tr>
               <th>Word</th>
               <th>Result</th>
               <th>Tries</th>
             </tr>
-
           </thead>
 
 
@@ -3604,14 +3338,13 @@
 
 
 
-  /* ==============================
-     CREATE / EDIT
-  ============================== */
+  /* =========================
+     CREATE LIST
+  ========================= */
 
   function openCreateList() {
 
     renderEditGameList();
-
 
     showScreen(
       'createScreen'
@@ -3628,13 +3361,11 @@
 
 
     if (
-      games.length ===
-      0
+      games.length === 0
     ) {
 
       container.innerHTML =
         '<div class="card">No games yet. Create your first spelling game.</div>';
-
 
       return;
     }
@@ -3692,14 +3423,12 @@
   function createNewGame() {
 
     if (
-      games.length >=
-      20
+      games.length >= 20
     ) {
 
       alert(
         'You can save up to 20 spelling games.'
       );
-
 
       return;
     }
@@ -3725,8 +3454,7 @@
 
 
     currentGameIndex =
-      games.length -
-      1;
+      games.length - 1;
 
 
     openEditor(
@@ -3744,7 +3472,6 @@
         'Delete this spelling game?'
       )
     ) {
-
       return;
     }
 
@@ -3756,8 +3483,7 @@
 
 
     for (
-      const word of
-      game.words
+      const word of game.words
     ) {
 
       try {
@@ -3773,9 +3499,7 @@
 
       } catch (error) {
 
-        console.error(
-          error
-        );
+        console.error(error);
       }
     }
 
@@ -3788,15 +3512,14 @@
 
     saveGames();
 
-
     renderEditGameList();
   }
 
 
 
-  /* ==============================
-     EDITOR
-  ============================== */
+  /* =========================
+     GAME EDITOR
+  ========================= */
 
   function openEditor(
     index
@@ -3840,7 +3563,6 @@
         'Please enter a game name.'
       );
 
-
       return;
     }
 
@@ -3869,14 +3591,12 @@
 
 
     if (
-      game.words.length >=
-      20
+      game.words.length >= 20
     ) {
 
       alert(
         'You can add up to 20 words to a game.'
       );
-
 
       return;
     }
@@ -3908,15 +3628,13 @@
 
 
     renderWordEditor(
-      game.words.length -
-      1
+      game.words.length - 1
     );
   }
 
 
   function renderWordEditor(
-    openIndex =
-      -1
+    openIndex = -1
   ) {
 
     const game =
@@ -3940,8 +3658,7 @@
 
 
     if (
-      game.words.length ===
-      0
+      game.words.length === 0
     ) {
 
       container.innerHTML = `
@@ -3955,7 +3672,6 @@
         </div>
 
       `;
-
 
       return;
     }
@@ -3984,8 +3700,10 @@
 
               ${
                 wordIndex === openIndex
-                ? '▲'
-                : '▼'
+                ?
+                '▲'
+                :
+                '▼'
               }
 
             </span>
@@ -3997,8 +3715,10 @@
             id="word-detail-${wordIndex}"
             class="word-detail ${
               wordIndex === openIndex
-              ? ''
-              : 'hidden'
+              ?
+              ''
+              :
+              'hidden'
             }">
 
 
@@ -4010,6 +3730,7 @@
 
               <input
                 type="text"
+
                 value="${escapeAttribute(
                   word.word
                 )}"
@@ -4238,15 +3959,11 @@
               </label>
 
 
-              <div>
-
-                ${renderEditableCards(
-                  word.correct,
-                  wordIndex,
-                  'correct'
-                )}
-
-              </div>
+              ${renderEditableCards(
+                word.correct,
+                wordIndex,
+                'correct'
+              )}
 
 
               <div class="add-card-row">
@@ -4256,10 +3973,21 @@
                   placeholder="Card text">
 
 
-                ${renderNewColourPicker(
-                  wordIndex,
-                  'correct'
-                )}
+                <select
+                  id="new-correct-colour-${wordIndex}"
+                  class="colour-select green"
+
+                  onchange="
+                    updateColourSelectStyle(
+                      this
+                    )
+                  ">
+
+                  ${renderColourOptions(
+                    'green'
+                  )}
+
+                </select>
 
 
                 <button
@@ -4288,15 +4016,11 @@
               </label>
 
 
-              <div>
-
-                ${renderEditableCards(
-                  word.extra,
-                  wordIndex,
-                  'extra'
-                )}
-
-              </div>
+              ${renderEditableCards(
+                word.extra,
+                wordIndex,
+                'extra'
+              )}
 
 
               <div class="add-card-row">
@@ -4306,10 +4030,21 @@
                   placeholder="Extra card">
 
 
-                ${renderNewColourPicker(
-                  wordIndex,
-                  'extra'
-                )}
+                <select
+                  id="new-extra-colour-${wordIndex}"
+                  class="colour-select green"
+
+                  onchange="
+                    updateColourSelectStyle(
+                      this
+                    )
+                  ">
+
+                  ${renderColourOptions(
+                    'green'
+                  )}
+
+                </select>
 
 
                 <button
@@ -4381,8 +4116,7 @@
   ) {
 
     if (
-      cards.length ===
-      0
+      cards.length === 0
     ) {
 
       return `
@@ -4416,12 +4150,23 @@
           ">
 
 
-        ${renderExistingColourPicker(
-          card.colour,
-          wordIndex,
-          type,
-          cardIndex
-        )}
+        <select
+          class="colour-select ${card.colour}"
+
+          onchange="
+            updateCardColour(
+              ${wordIndex},
+              '${type}',
+              ${cardIndex},
+              this
+            )
+          ">
+
+          ${renderColourOptions(
+            card.colour
+          )}
+
+        </select>
 
 
         <button
@@ -4447,9 +4192,9 @@
 
 
 
-  /* ==============================
+  /* =========================
      EDITOR MEDIA
-  ============================== */
+  ========================= */
 
   async function loadEditorMedia() {
 
@@ -4460,8 +4205,7 @@
 
 
     for (
-      const word of
-      game.words
+      const word of game.words
     ) {
 
       const pictureFound =
@@ -4527,9 +4271,9 @@
 
 
 
-  /* ==============================
+  /* =========================
      PICTURES
-  ============================== */
+  ========================= */
 
   function handlePictureDragOver(
     event
@@ -4577,8 +4321,7 @@
 
     if (
       !files ||
-      files.length ===
-      0
+      files.length === 0
     ) {
 
       return;
@@ -4604,14 +4347,12 @@
 
 
     if (!items) {
-
       return;
     }
 
 
     for (
-      const item of
-      items
+      const item of items
     ) {
 
       if (
@@ -4651,7 +4392,6 @@
   ) {
 
     if (!file) {
-
       return;
     }
 
@@ -4666,7 +4406,6 @@
       alert(
         'Please choose, drop or paste an image file.'
       );
-
 
       return;
     }
@@ -4697,9 +4436,7 @@
 
     } catch (error) {
 
-      console.error(
-        error
-      );
+      console.error(error);
 
 
       alert(
@@ -4727,17 +4464,15 @@
 
     } catch (error) {
 
-      console.error(
-        error
-      );
+      console.error(error);
     }
   }
 
 
 
-  /* ==============================
-     AUDIO
-  ============================== */
+  /* =========================
+     AUDIO RECORDING
+  ========================= */
 
   function chooseRecordingMimeType() {
 
@@ -4761,8 +4496,7 @@
 
 
     for (
-      const type of
-      options
+      const type of options
     ) {
 
       if (
@@ -4796,7 +4530,6 @@
         'Please stop the current recording first.'
       );
 
-
       return;
     }
 
@@ -4811,7 +4544,6 @@
       alert(
         'Voice recording is not supported by this browser.'
       );
-
 
       return;
     }
@@ -4856,22 +4588,17 @@
       activeRecorder =
         recorder;
 
-
       activeRecordingStream =
         stream;
-
 
       activeRecordingChunks =
         [];
 
-
       activeRecordingWordId =
         wordId;
 
-
       activeRecordingWordIndex =
         wordIndex;
-
 
       recordingSeconds =
         0;
@@ -4891,19 +4618,17 @@
 
       const stopButton =
         document.getElementById(
-    `stop-button-${wordId}`
+          `stop-button-${wordId}`
         );
 
 
       if (recordButton) {
-
         recordButton.disabled =
           true;
       }
 
 
       if (stopButton) {
-
         stopButton.disabled =
           false;
       }
@@ -4926,8 +4651,7 @@
 
           if (
             event.data &&
-            event.data.size >
-            0
+            event.data.size > 0
           ) {
 
             activeRecordingChunks.push(
@@ -4965,8 +4689,7 @@
           try {
 
             if (
-              blob.size >
-              0
+              blob.size > 0
             ) {
 
               await saveAudioBlob(
@@ -4988,9 +4711,7 @@
 
           } catch (error) {
 
-            console.error(
-              error
-            );
+            console.error(error);
 
 
             alert(
@@ -5002,14 +4723,11 @@
           activeRecorder =
             null;
 
-
           activeRecordingChunks =
             [];
 
-
           activeRecordingWordId =
             null;
-
 
           activeRecordingWordIndex =
             null;
@@ -5067,9 +4785,7 @@
 
     } catch (error) {
 
-      console.error(
-        error
-      );
+      console.error(error);
 
 
       stopMicrophoneStream();
@@ -5103,7 +4819,6 @@
         recordingInterval
       );
 
-
       recordingInterval =
         null;
     }
@@ -5114,7 +4829,6 @@
       clearTimeout(
         recordingTimeout
       );
-
 
       recordingTimeout =
         null;
@@ -5131,10 +4845,8 @@
       activeRecordingStream
         .getTracks()
         .forEach(
-          track => {
-
-            track.stop();
-          }
+          track =>
+            track.stop()
         );
 
 
@@ -5162,17 +4874,15 @@
 
     } catch (error) {
 
-      console.error(
-        error
-      );
+      console.error(error);
     }
   }
 
 
 
-  /* ==============================
-     EDIT WORDS AND CARDS
-  ============================== */
+  /* =========================
+     WORD/CARD EDITING
+  ========================= */
 
   function toggleWord(
     index
@@ -5317,6 +5027,34 @@
   }
 
 
+  function updateCardColour(
+    wordIndex,
+    type,
+    cardIndex,
+    select
+  ) {
+
+    games[
+      currentGameIndex
+    ]
+    .words[
+      wordIndex
+    ][type][
+      cardIndex
+    ]
+    .colour =
+      select.value;
+
+
+    saveGames();
+
+
+    updateColourSelectStyle(
+      select
+    );
+  }
+
+
   function addSoundCard(
     wordIndex,
     type
@@ -5343,7 +5081,6 @@
       alert(
         'Please type something on the card first.'
       );
-
 
       return;
     }
@@ -5434,7 +5171,6 @@
         'Delete this word?'
       )
     ) {
-
       return;
     }
 
@@ -5461,9 +5197,7 @@
 
     } catch (error) {
 
-      console.error(
-        error
-      );
+      console.error(error);
     }
 
 
@@ -5485,9 +5219,9 @@
 
 
 
-  /* ==============================
+  /* =========================
      PREVIEW
-  ============================== */
+  ========================= */
 
   function openPreview(
     wordIndex
@@ -5777,8 +5511,7 @@
 
 
     if (
-      chosen ===
-      expected
+      chosen === expected
     ) {
 
       feedback.textContent =
@@ -5795,12 +5528,10 @@
   function previousPreviewWord() {
 
     if (
-      currentPreviewWordIndex >
-      0
+      currentPreviewWordIndex > 0
     ) {
 
       currentPreviewWordIndex--;
-
 
       renderPreview();
     }
@@ -5817,12 +5548,10 @@
 
     if (
       currentPreviewWordIndex <
-      game.words.length -
-      1
+      game.words.length - 1
     ) {
 
       currentPreviewWordIndex++;
-
 
       renderPreview();
     }
