@@ -73,6 +73,11 @@
       padding: 12px 20px;
     }
 
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
     input,
     select {
       font-size: 18px;
@@ -131,6 +136,18 @@
 
     .danger {
       background: #f4b1b1;
+    }
+
+    .record-button {
+      background: #f5a6c8;
+    }
+
+    .stop-button {
+      background: #ffd65a;
+    }
+
+    .audio-play-button {
+      background: #78c7f2;
     }
 
     .create-new {
@@ -390,6 +407,15 @@
       line-height: 1.5;
     }
 
+    .support-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 18px 0;
+    }
+
     .picture-editor {
       display: flex;
       gap: 18px;
@@ -437,7 +463,6 @@
       max-height: 250px;
       object-fit: contain;
       display: block;
-      margin: 18px auto;
       border-radius: 14px;
     }
 
@@ -449,6 +474,42 @@
 
     .file-input {
       max-width: 100%;
+    }
+
+    .audio-editor {
+      border: 2px solid #d7e1ea;
+      border-radius: 14px;
+      padding: 16px;
+      background: #f9fbfd;
+    }
+
+    .audio-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .audio-status {
+      margin: 8px 0;
+      min-height: 24px;
+      font-weight: bold;
+    }
+
+    .audio-preview {
+      width: 100%;
+      max-width: 500px;
+      margin-top: 10px;
+    }
+
+    .recording-live {
+      color: #a3204b;
+    }
+
+    .play-audio-box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     @media (max-width: 750px) {
@@ -479,6 +540,8 @@
 
 
 <body>
+
+  <!-- HOME -->
 
   <main id="homeScreen"
         class="screen home">
@@ -520,6 +583,8 @@
   </main>
 
 
+  <!-- PLAY LIST -->
+
   <section id="playScreen"
            class="screen hidden">
 
@@ -539,6 +604,8 @@
   </section>
 
 
+  <!-- CHILD PLAY -->
+
   <section id="childPlayScreen"
            class="screen hidden">
 
@@ -557,9 +624,28 @@
         <div id="childCounter"
              class="game-counter"></div>
 
-        <img id="childPicture"
-             class="word-picture hidden"
-             alt="Picture clue">
+
+        <div class="support-area">
+
+          <img id="childPicture"
+               class="word-picture hidden"
+               alt="Picture clue">
+
+          <div id="childAudioBox"
+               class="play-audio-box hidden">
+
+            <button class="audio-play-button"
+                    onclick="playSavedAudio('childAudio')">
+              ▶ Play Word
+            </button>
+
+            <audio id="childAudio"
+                   class="hidden"></audio>
+
+          </div>
+
+        </div>
+
 
         <div id="childHint"
              class="word-hint hidden"></div>
@@ -595,6 +681,8 @@
 
   </section>
 
+
+  <!-- CREATE LIST -->
 
   <section id="createScreen"
            class="screen hidden">
@@ -649,6 +737,8 @@
 
   </section>
 
+
+  <!-- EDITOR -->
 
   <section id="editorScreen"
            class="screen hidden">
@@ -714,6 +804,8 @@
   </section>
 
 
+  <!-- PREVIEW -->
+
   <section id="previewScreen"
            class="screen hidden">
 
@@ -742,9 +834,28 @@
 
         <h2>Preview</h2>
 
-        <img id="previewPicture"
-             class="word-picture hidden"
-             alt="Picture clue">
+
+        <div class="support-area">
+
+          <img id="previewPicture"
+               class="word-picture hidden"
+               alt="Picture clue">
+
+          <div id="previewAudioBox"
+               class="play-audio-box hidden">
+
+            <button class="audio-play-button"
+                    onclick="playSavedAudio('previewAudio')">
+              ▶ Play Word
+            </button>
+
+            <audio id="previewAudio"
+                   class="hidden"></audio>
+
+          </div>
+
+        </div>
+
 
         <div id="previewHint"
              class="word-hint hidden"></div>
@@ -786,6 +897,8 @@
   </section>
 
 
+  <!-- RESULTS -->
+
   <section id="resultsScreen"
            class="screen hidden">
 
@@ -804,6 +917,8 @@
 
   </section>
 
+
+  <!-- HELP -->
 
   <section id="helpScreen"
            class="screen hidden">
@@ -839,7 +954,7 @@
 
         <div class="help-step">
           🔊 <strong>1. Listen</strong><br>
-          Press the play button to hear your word.
+          Press Play Word if there is a recording.
         </div>
 
         <div class="help-step">
@@ -880,7 +995,7 @@
 
         <div class="help-step">
           <strong>3. Add optional supports</strong><br>
-          Add a meaning, clue or picture to a word if helpful.
+          Add a text hint, picture, voice recording, or any combination.
         </div>
 
         <div class="help-step">
@@ -911,3368 +1026,2519 @@
 
 
 
-  <script>
+<script>
 
-    function makeId(prefix) {
+  /* =====================================
+     BASIC HELPERS
+  ===================================== */
 
-      return (
-        prefix +
-        '-' +
-        Date.now() +
-        '-' +
-        Math.random()
-          .toString(36)
-          .slice(2, 10)
-      );
+  function makeId(prefix) {
+
+    return (
+      prefix +
+      '-' +
+      Date.now() +
+      '-' +
+      Math.random()
+        .toString(36)
+        .slice(2, 10)
+    );
+  }
+
+
+  function capitalise(text) {
+
+    return (
+      text.charAt(0)
+        .toUpperCase()
+      +
+      text.slice(1)
+    );
+  }
+
+
+  function escapeHtml(text) {
+
+    return String(
+      text ?? ''
+    )
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
+  }
+
+
+  function escapeAttribute(text) {
+
+    return escapeHtml(text);
+  }
+
+
+  function shuffleArray(array) {
+
+    const copy =
+      [...array];
+
+
+    for (
+      let i = copy.length - 1;
+      i > 0;
+      i--
+    ) {
+
+      const j =
+        Math.floor(
+          Math.random() *
+          (i + 1)
+        );
+
+
+      [
+        copy[i],
+        copy[j]
+      ]
+      =
+      [
+        copy[j],
+        copy[i]
+      ];
     }
 
 
-    function capitalise(text) {
-
-      return (
-        text.charAt(0)
-          .toUpperCase()
-        +
-        text.slice(1)
-      );
-    }
+    return copy;
+  }
 
 
-    function escapeHtml(text) {
 
-      return String(
-        text ?? ''
-      )
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
+  /* =====================================
+     INDEXED DB
+  ===================================== */
 
+  const MEDIA_DB_NAME =
+    'SpellingCardsMedia';
 
-    function escapeAttribute(text) {
+  const MEDIA_DB_VERSION =
+    2;
 
-      return escapeHtml(text);
-    }
+  const IMAGE_STORE =
+    'images';
 
-
-    function shuffleArray(array) {
-
-      const copy =
-        [...array];
+  const AUDIO_STORE =
+    'audio';
 
 
-      for (
-        let i = copy.length - 1;
-        i > 0;
-        i--
-      ) {
+  function openMediaDB() {
 
-        const j =
-          Math.floor(
-            Math.random() *
-            (i + 1)
+    return new Promise(
+      (resolve, reject) => {
+
+        const request =
+          indexedDB.open(
+            MEDIA_DB_NAME,
+            MEDIA_DB_VERSION
           );
 
 
-        [
-          copy[i],
-          copy[j]
-        ]
-        =
-        [
-          copy[j],
-          copy[i]
-        ];
-      }
+        request.onupgradeneeded =
+          function(event) {
+
+            const db =
+              event.target.result;
 
 
-      return copy;
-    }
-
-
-
-    const MEDIA_DB_NAME =
-      'SpellingCardsMedia';
-
-    const MEDIA_DB_VERSION =
-      1;
-
-    const IMAGE_STORE =
-      'images';
-
-
-    function openMediaDB() {
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const request =
-            indexedDB.open(
-              MEDIA_DB_NAME,
-              MEDIA_DB_VERSION
-            );
-
-
-          request.onupgradeneeded =
-            function(event) {
-
-              const db =
-                event.target.result;
-
-
-              if (
-                !db.objectStoreNames
-                  .contains(
-                    IMAGE_STORE
-                  )
-              ) {
-
-                db.createObjectStore(
+            if (
+              !db.objectStoreNames
+                .contains(
                   IMAGE_STORE
-                );
-              }
-            };
+                )
+            ) {
 
-
-          request.onsuccess =
-            function() {
-
-              resolve(
-                request.result
-              );
-            };
-
-
-          request.onerror =
-            function() {
-
-              reject(
-                request.error
-              );
-            };
-        }
-      );
-    }
-
-
-    async function saveImageBlob(
-      wordId,
-      blob
-    ) {
-
-      const db =
-        await openMediaDB();
-
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const transaction =
-            db.transaction(
-              IMAGE_STORE,
-              'readwrite'
-            );
-
-
-          transaction
-            .objectStore(
-              IMAGE_STORE
-            )
-            .put(
-              blob,
-              wordId
-            );
-
-
-          transaction.oncomplete =
-            function() {
-
-              db.close();
-
-              resolve();
-            };
-
-
-          transaction.onerror =
-            function() {
-
-              db.close();
-
-              reject(
-                transaction.error
-              );
-            };
-        }
-      );
-    }
-
-
-    async function getImageBlob(
-      wordId
-    ) {
-
-      const db =
-        await openMediaDB();
-
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const transaction =
-            db.transaction(
-              IMAGE_STORE,
-              'readonly'
-            );
-
-
-          const request =
-            transaction
-              .objectStore(
+              db.createObjectStore(
                 IMAGE_STORE
-              )
-              .get(
-                wordId
               );
+            }
 
 
-          request.onsuccess =
-            function() {
+            if (
+              !db.objectStoreNames
+                .contains(
+                  AUDIO_STORE
+                )
+            ) {
 
-              db.close();
-
-              resolve(
-                request.result ||
-                null
+              db.createObjectStore(
+                AUDIO_STORE
               );
-            };
+            }
+          };
 
 
-          request.onerror =
-            function() {
+        request.onsuccess =
+          function() {
 
-              db.close();
-
-              reject(
-                request.error
-              );
-            };
-        }
-      );
-    }
-
-
-    async function deleteImageBlob(
-      wordId
-    ) {
-
-      const db =
-        await openMediaDB();
-
-
-      return new Promise(
-        (resolve, reject) => {
-
-          const transaction =
-            db.transaction(
-              IMAGE_STORE,
-              'readwrite'
+            resolve(
+              request.result
             );
+          };
 
 
-          transaction
-            .objectStore(
-              IMAGE_STORE
-            )
-            .delete(
-              wordId
+        request.onerror =
+          function() {
+
+            reject(
+              request.error
             );
-
-
-          transaction.oncomplete =
-            function() {
-
-              db.close();
-
-              resolve();
-            };
-
-
-          transaction.onerror =
-            function() {
-
-              db.close();
-
-              reject(
-                transaction.error
-              );
-            };
-        }
-      );
-    }
+          };
+      }
+    );
+  }
 
 
 
-    function resizeImageFile(file) {
+  function putMediaBlob(
+    storeName,
+    wordId,
+    blob
+  ) {
 
-      return new Promise(
-        (resolve, reject) => {
+    return openMediaDB()
+      .then(
+        db => {
 
-          const reader =
-            new FileReader();
+          return new Promise(
+            (resolve, reject) => {
+
+              const transaction =
+                db.transaction(
+                  storeName,
+                  'readwrite'
+                );
 
 
-          reader.onload =
-            function() {
+              transaction
+                .objectStore(
+                  storeName
+                )
+                .put(
+                  blob,
+                  wordId
+                );
 
-              const image =
-                new Image();
 
-
-              image.onload =
+              transaction.oncomplete =
                 function() {
 
-                  const maxSize =
-                    1200;
+                  db.close();
 
-
-                  let width =
-                    image.width;
-
-                  let height =
-                    image.height;
-
-
-                  if (
-                    width > maxSize ||
-                    height > maxSize
-                  ) {
-
-                    const scale =
-                      Math.min(
-                        maxSize / width,
-                        maxSize / height
-                      );
-
-
-                    width =
-                      Math.round(
-                        width * scale
-                      );
-
-
-                    height =
-                      Math.round(
-                        height * scale
-                      );
-                  }
-
-
-                  const canvas =
-                    document.createElement(
-                      'canvas'
-                    );
-
-
-                  canvas.width =
-                    width;
-
-
-                  canvas.height =
-                    height;
-
-
-                  const context =
-                    canvas.getContext(
-                      '2d'
-                    );
-
-
-                  context.drawImage(
-                    image,
-                    0,
-                    0,
-                    width,
-                    height
-                  );
-
-
-                  canvas.toBlob(
-                    function(blob) {
-
-                      if (
-                        blob
-                      ) {
-
-                        resolve(
-                          blob
-                        );
-
-                      } else {
-
-                        reject(
-                          new Error(
-                            'Could not prepare image.'
-                          )
-                        );
-                      }
-                    },
-
-                    'image/jpeg',
-                    0.82
-                  );
+                  resolve();
                 };
 
 
-              image.onerror =
+              transaction.onerror =
                 function() {
+
+                  db.close();
 
                   reject(
-                    new Error(
-                      'The picture could not be opened.'
-                    )
+                    transaction.error
+                  );
+                };
+            }
+          );
+        }
+      );
+  }
+
+
+  function getMediaBlob(
+    storeName,
+    wordId
+  ) {
+
+    return openMediaDB()
+      .then(
+        db => {
+
+          return new Promise(
+            (resolve, reject) => {
+
+              const transaction =
+                db.transaction(
+                  storeName,
+                  'readonly'
+                );
+
+
+              const request =
+                transaction
+                  .objectStore(
+                    storeName
+                  )
+                  .get(
+                    wordId
+                  );
+
+
+              request.onsuccess =
+                function() {
+
+                  db.close();
+
+                  resolve(
+                    request.result ||
+                    null
                   );
                 };
 
 
-              image.src =
-                reader.result;
-            };
+              request.onerror =
+                function() {
 
+                  db.close();
 
-          reader.onerror =
-            function() {
-
-              reject(
-                reader.error
-              );
-            };
-
-
-          reader.readAsDataURL(
-            file
-          );
-        }
-      );
-    }
-
-
-
-    const objectUrls =
-      new Map();
-
-
-    function clearImageElement(
-      element
-    ) {
-
-      const oldUrl =
-        objectUrls.get(
-          element.id
-        );
-
-
-      if (
-        oldUrl
-      ) {
-
-        URL.revokeObjectURL(
-          oldUrl
-        );
-
-
-        objectUrls.delete(
-          element.id
-        );
-      }
-
-
-      element.removeAttribute(
-        'src'
-      );
-
-
-      element.classList.add(
-        'hidden'
-      );
-    }
-
-
-    async function displayWordImage(
-      wordId,
-      elementId
-    ) {
-
-      const element =
-        document.getElementById(
-          elementId
-        );
-
-
-      if (
-        !element
-      ) {
-
-        return false;
-      }
-
-
-      clearImageElement(
-        element
-      );
-
-
-      try {
-
-        const blob =
-          await getImageBlob(
-            wordId
-          );
-
-
-        if (
-          !blob
-        ) {
-
-          return false;
-        }
-
-
-        const url =
-          URL.createObjectURL(
-            blob
-          );
-
-
-        objectUrls.set(
-          element.id,
-          url
-        );
-
-
-        element.src =
-          url;
-
-
-        element.classList.remove(
-          'hidden'
-        );
-
-
-        return true;
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
-
-        return false;
-      }
-    }
-
-
-
-    const colourOptions = [
-      'green',
-      'blue',
-      'yellow',
-      'purple',
-      'pink'
-    ];
-
-
-    const defaultColourMeanings = {
-
-      green:
-        'First letter of the word and each syllable',
-
-      blue:
-        'Other consonant',
-
-      yellow:
-        'Vowel',
-
-      purple:
-        'Letter/pattern of the week',
-
-      pink:
-        'Last letter'
-
-    };
-
-
-    let colourMeanings =
-      JSON.parse(
-        localStorage.getItem(
-          'spellingCardsColourMeanings'
-        )
-      );
-
-
-    if (
-      !colourMeanings
-    ) {
-
-      colourMeanings = {
-        ...defaultColourMeanings
-      };
-
-
-      saveColourMeaningsToStorage();
-    }
-
-
-    function saveColourMeaningsToStorage() {
-
-      localStorage.setItem(
-        'spellingCardsColourMeanings',
-        JSON.stringify(
-          colourMeanings
-        )
-      );
-    }
-
-
-    function toggleColourMeanings() {
-
-      const panel =
-        document.getElementById(
-          'colourMeaningPanel'
-        );
-
-
-      panel.classList.toggle(
-        'hidden'
-      );
-
-
-      if (
-        !panel.classList.contains(
-          'hidden'
-        )
-      ) {
-
-        renderColourMeaningInputs();
-      }
-    }
-
-
-    function renderColourMeaningInputs() {
-
-      const container =
-        document.getElementById(
-          'colourMeaningInputs'
-        );
-
-
-      container.innerHTML =
-        colourOptions.map(
-          colour => `
-
-          <div class="colour-meaning-row">
-
-            <div class="colour-label ${colour}">
-              ${capitalise(colour)}
-            </div>
-
-            <input
-              id="meaning-${colour}"
-              type="text"
-              value="${escapeAttribute(
-                colourMeanings[colour] || ''
-              )}">
-
-          </div>
-
-        `
-        ).join('');
-    }
-
-
-    function saveColourMeanings() {
-
-      colourOptions.forEach(
-        colour => {
-
-          const input =
-            document.getElementById(
-              `meaning-${colour}`
-            );
-
-
-          if (
-            input
-          ) {
-
-            colourMeanings[colour] =
-              input.value.trim();
-          }
-        }
-      );
-
-
-      saveColourMeaningsToStorage();
-
-
-      alert(
-        'Colour meanings saved.'
-      );
-
-
-      document.getElementById(
-        'colourMeaningPanel'
-      )
-      .classList.add(
-        'hidden'
-      );
-    }
-
-
-    function renderColourOptions(
-      selected = 'green'
-    ) {
-
-      return colourOptions.map(
-        colour => `
-
-          <option
-            value="${colour}"
-            ${
-              colour === selected
-              ? 'selected'
-              : ''
-            }>
-
-            ${capitalise(colour)}
-            – ${escapeHtml(
-              colourMeanings[colour] || ''
-            )}
-
-          </option>
-
-        `
-      ).join('');
-    }
-
-
-
-    let games =
-      JSON.parse(
-        localStorage.getItem(
-          'spellingCardsGames'
-        )
-      );
-
-
-    if (
-      !games
-    ) {
-
-      games = [
-
-        {
-          id:
-            makeId('game'),
-
-          name:
-            'Week 1 – ar sound',
-
-          words: [
-
-            {
-              id:
-                makeId('word'),
-
-              word:
-                'car',
-
-              hint:
-                '',
-
-              correct: [
-
-                {
-                  text:
-                    'c',
-
-                  colour:
-                    'green'
-                },
-
-                {
-                  text:
-                    'ar',
-
-                  colour:
-                    'purple'
-                }
-
-              ],
-
-              extra: [
-
-                {
-                  text:
-                    'or',
-
-                  colour:
-                    'purple'
-                }
-
-              ]
-            },
-
-
-            {
-              id:
-                makeId('word'),
-
-              word:
-                'farm',
-
-              hint:
-                'A place where animals or crops may be raised.',
-
-              correct: [
-
-                {
-                  text:
-                    'f',
-
-                  colour:
-                    'green'
-                },
-
-                {
-                  text:
-                    'ar',
-
-                  colour:
-                    'purple'
-                },
-
-                {
-                  text:
-                    'm',
-
-                  colour:
-                    'pink'
-                }
-
-              ],
-
-              extra: [
-
-                {
-                  text:
-                    'b',
-
-                  colour:
-                    'green'
-                },
-
-                {
-                  text:
-                    'a',
-
-                  colour:
-                    'purple'
-                }
-
-              ]
-            },
-
-
-            {
-              id:
-                makeId('word'),
-
-              word:
-                'start',
-
-              hint:
-                '',
-
-              correct: [
-
-                {
-                  text:
-                    'st',
-
-                  colour:
-                    'green'
-                },
-
-                {
-                  text:
-                    'ar',
-
-                  colour:
-                    'purple'
-                },
-
-                {
-                  text:
-                    't',
-
-                  colour:
-                    'pink'
-                }
-
-              ],
-
-              extra: [
-
-                {
-                  text:
-                    's',
-
-                  colour:
-                    'green'
-                },
-
-                {
-                  text:
-                    'or',
-
-                  colour:
-                    'purple'
-                }
-
-              ]
-            }
-
-          ]
-        }
-
-      ];
-
-
-      saveGames();
-    }
-
-
-
-    function ensureIds() {
-
-      let changed =
-        false;
-
-
-      games.forEach(
-        game => {
-
-          if (
-            !game.id
-          ) {
-
-            game.id =
-              makeId(
-                'game'
-              );
-
-
-            changed =
-              true;
-          }
-
-
-          game.words.forEach(
-            word => {
-
-              if (
-                !word.id
-              ) {
-
-                word.id =
-                  makeId(
-                    'word'
+                  reject(
+                    request.error
                   );
-
-
-                changed =
-                  true;
-              }
-
-
-              if (
-                typeof word.hint !==
-                'string'
-              ) {
-
-                word.hint =
-                  '';
-
-
-                changed =
-                  true;
-              }
+                };
             }
           );
         }
       );
+  }
 
 
-      if (
-        changed
-      ) {
+  function deleteMediaBlob(
+    storeName,
+    wordId
+  ) {
 
-        saveGames();
-      }
-    }
+    return openMediaDB()
+      .then(
+        db => {
 
+          return new Promise(
+            (resolve, reject) => {
 
-    function saveGames() {
-
-      localStorage.setItem(
-        'spellingCardsGames',
-        JSON.stringify(
-          games
-        )
-      );
-    }
-
-
-    ensureIds();
-
-
-
-    let currentGameIndex =
-      0;
-
-    let currentPreviewWordIndex =
-      0;
-
-    let previewSelected =
-      [];
-
-    let childWordIndex =
-      0;
-
-    let childSelected =
-      [];
-
-    let childAttempts =
-      0;
-
-    let childWordFinished =
-      false;
-
-    let currentGameResults =
-      [];
-
-
-
-    function showScreen(
-      screenId
-    ) {
-
-      document.querySelectorAll(
-        '.screen'
-      )
-      .forEach(
-        screen => {
-
-          screen.classList.add(
-            'hidden'
-          );
-        }
-      );
-
-
-      document.getElementById(
-        screenId
-      )
-      .classList.remove(
-        'hidden'
-      );
-
-
-      window.scrollTo(
-        0,
-        0
-      );
-    }
-
-
-
-    function openHelp() {
-
-      showScreen(
-        'helpScreen'
-      );
-
-
-      showChildHelp();
-    }
-
-
-    function showChildHelp() {
-
-      document.getElementById(
-        'childHelp'
-      )
-      .classList.remove(
-        'hidden'
-      );
-
-
-      document.getElementById(
-        'adultHelp'
-      )
-      .classList.add(
-        'hidden'
-      );
-
-
-      document.getElementById(
-        'childTab'
-      )
-      .classList.add(
-        'active'
-      );
-
-
-      document.getElementById(
-        'adultTab'
-      )
-      .classList.remove(
-        'active'
-      );
-    }
-
-
-    function showAdultHelp() {
-
-      document.getElementById(
-        'adultHelp'
-      )
-      .classList.remove(
-        'hidden'
-      );
-
-
-      document.getElementById(
-        'childHelp'
-      )
-      .classList.add(
-        'hidden'
-      );
-
-
-      document.getElementById(
-        'adultTab'
-      )
-      .classList.add(
-        'active'
-      );
-
-
-      document.getElementById(
-        'childTab'
-      )
-      .classList.remove(
-        'active'
-      );
-    }
-
-
-
-    function openPlayList() {
-
-      renderPlayGameList();
-
-
-      showScreen(
-        'playScreen'
-      );
-    }
-
-
-    function renderPlayGameList() {
-
-      const container =
-        document.getElementById(
-          'playGameList'
-        );
-
-
-      if (
-        games.length ===
-        0
-      ) {
-
-        container.innerHTML =
-          '<div class="card">No spelling games have been created yet.</div>';
-
-
-        return;
-      }
-
-
-      container.innerHTML =
-        games.map(
-          (game, index) => `
-
-          <div class="card game-row">
-
-            <div>
-
-              <strong>
-                ${escapeHtml(
-                  game.name
-                )}
-              </strong>
-
-              <p>
-                ${game.words.length}
-                word${game.words.length === 1 ? '' : 's'}
-              </p>
-
-            </div>
-
-
-            <button
-              class="play"
-              onclick="startChildGame(${index})">
-              Play
-            </button>
-
-          </div>
-
-        `
-        ).join('');
-    }
-
-
-
-    function startChildGame(
-      gameIndex
-    ) {
-
-      if (
-        games[
-          gameIndex
-        ]
-        .words.length ===
-        0
-      ) {
-
-        alert(
-          'This game does not have any words yet.'
-        );
-
-
-        return;
-      }
-
-
-      currentGameIndex =
-        gameIndex;
-
-
-      childWordIndex =
-        0;
-
-
-      currentGameResults =
-        [];
-
-
-      renderChildWord();
-
-
-      showScreen(
-        'childPlayScreen'
-      );
-    }
-
-
-    async function renderChildWord() {
-
-      const game =
-        games[
-          currentGameIndex
-        ];
-
-
-      const word =
-        game.words[
-          childWordIndex
-        ];
-
-
-      childSelected =
-        [];
-
-
-      childAttempts =
-        0;
-
-
-      childWordFinished =
-        false;
-
-
-      document.getElementById(
-        'childGameName'
-      )
-      .innerHTML =
-        `<h2>${escapeHtml(
-          game.name
-        )}</h2>`;
-
-
-      document.getElementById(
-        'childCounter'
-      )
-      .textContent =
-        `Word ${
-          childWordIndex + 1
-        } of ${
-          game.words.length
-        }`;
-
-
-      await displayWordImage(
-        word.id,
-        'childPicture'
-      );
-
-
-      const hintBox =
-        document.getElementById(
-          'childHint'
-        );
-
-
-      if (
-        word.hint &&
-        word.hint.trim()
-      ) {
-
-        hintBox.textContent =
-          word.hint;
-
-
-        hintBox.classList.remove(
-          'hidden'
-        );
-
-      } else {
-
-        hintBox.textContent =
-          '';
-
-
-        hintBox.classList.add(
-          'hidden'
-        );
-      }
-
-
-      document.getElementById(
-        'childAnswer'
-      )
-      .innerHTML =
-        '';
-
-
-      document.getElementById(
-        'childFeedback'
-      )
-      .textContent =
-        '';
-
-
-      document.getElementById(
-        'childCheckButton'
-      )
-      .classList.remove(
-        'hidden'
-      );
-
-
-      document.getElementById(
-        'childNextButton'
-      )
-      .classList.add(
-        'hidden'
-      );
-
-
-      renderChildChoices();
-    }
-
-
-    function renderChildChoices() {
-
-      const word =
-        games[
-          currentGameIndex
-        ]
-        .words[
-          childWordIndex
-        ];
-
-
-      const choices =
-        shuffleArray([
-
-          ...word.correct.map(
-            card => ({
-              ...card
-            })
-          ),
-
-          ...word.extra.map(
-            card => ({
-              ...card
-            })
-          )
-
-        ]);
-
-
-      const container =
-        document.getElementById(
-          'childChoices'
-        );
-
-
-      container.innerHTML =
-        '';
-
-
-      choices.forEach(
-        card => {
-
-          const button =
-            document.createElement(
-              'button'
-            );
-
-
-          button.className =
-            `choice-card sound-card ${card.colour}`;
-
-
-          button.textContent =
-            card.text;
-
-
-          button.addEventListener(
-            'click',
-            () => {
-
-              if (
-                childWordFinished
-              ) {
-
-                return;
-              }
-
-
-              childSelected.push({
-
-                text:
-                  card.text,
-
-                colour:
-                  card.colour,
-
-                sourceButton:
-                  button
-
-              });
-
-
-              button.classList.add(
-                'used'
-              );
-
-
-              renderChildAnswer();
-            }
-          );
-
-
-          container.appendChild(
-            button
-          );
-        }
-      );
-    }
-
-
-    function renderChildAnswer() {
-
-      const container =
-        document.getElementById(
-          'childAnswer'
-        );
-
-
-      container.innerHTML =
-        '';
-
-
-      childSelected.forEach(
-        (card, index) => {
-
-          const button =
-            document.createElement(
-              'button'
-            );
-
-
-          button.className =
-            `sound-card ${card.colour}`;
-
-
-          button.textContent =
-            card.text;
-
-
-          button.addEventListener(
-            'click',
-            () => {
-
-              if (
-                childWordFinished
-              ) {
-
-                return;
-              }
-
-
-              card.sourceButton
-                ?.classList.remove(
-                  'used'
+              const transaction =
+                db.transaction(
+                  storeName,
+                  'readwrite'
                 );
 
 
-              childSelected.splice(
-                index,
-                1
-              );
-
-
-              renderChildAnswer();
-            }
-          );
-
-
-          container.appendChild(
-            button
-          );
-        }
-      );
-    }
-
-
-    function checkChildAnswer() {
-
-      if (
-        childWordFinished
-      ) {
-
-        return;
-      }
-
-
-      const word =
-        games[
-          currentGameIndex
-        ]
-        .words[
-          childWordIndex
-        ];
-
-
-      const expected =
-        word.correct
-          .map(
-            card =>
-              card.text
-          )
-          .join('|');
-
-
-      const chosen =
-        childSelected
-          .map(
-            card =>
-              card.text
-          )
-          .join('|');
-
-
-      const feedback =
-        document.getElementById(
-          'childFeedback'
-        );
-
-
-      if (
-        chosen ===
-        expected
-      ) {
-
-        const tries =
-          childAttempts +
-          1;
-
-
-        feedback.textContent =
-          '⭐ You know your words! Great spelling!';
-
-
-        currentGameResults.push({
-
-          word:
-            word.word,
-
-          result:
-            'Great spelling!',
-
-          tries:
-            tries,
-
-          needsPractice:
-            false
-
-        });
-
-
-        finishChildWord();
-
-
-        return;
-      }
-
-
-      childAttempts++;
-
-
-      if (
-        childAttempts ===
-        1
-      ) {
-
-        feedback.textContent =
-          '⭐ Keep going! You’re really listening to the sounds in your word.';
-
-
-        resetChildAttempt();
-
-      } else {
-
-        feedback.textContent =
-          '⭐ Nice try! Here’s the correct word:';
-
-
-        showCorrectChildAnswer();
-
-
-        currentGameResults.push({
-
-          word:
-            word.word,
-
-          result:
-            'Extra practice needed',
-
-          tries:
-            '2+',
-
-          needsPractice:
-            true
-
-        });
-
-
-        finishChildWord();
-      }
-    }
-
-
-    function resetChildAttempt() {
-
-      childSelected =
-        [];
-
-
-      document.getElementById(
-        'childAnswer'
-      )
-      .innerHTML =
-        '';
-
-
-      document.querySelectorAll(
-        '#childChoices .choice-card'
-      )
-      .forEach(
-        button => {
-
-          button.classList.remove(
-            'used'
-          );
-        }
-      );
-    }
-
-
-    function showCorrectChildAnswer() {
-
-      const word =
-        games[
-          currentGameIndex
-        ]
-        .words[
-          childWordIndex
-        ];
-
-
-      const answer =
-        document.getElementById(
-          'childAnswer'
-        );
-
-
-      answer.innerHTML =
-        '';
-
-
-      word.correct.forEach(
-        card => {
-
-          const item =
-            document.createElement(
-              'div'
-            );
-
-
-          item.className =
-            `sound-card ${card.colour}`;
-
-
-          item.textContent =
-            card.text;
-
-
-          answer.appendChild(
-            item
-          );
-        }
-      );
-    }
-
-
-    function finishChildWord() {
-
-      childWordFinished =
-        true;
-
-
-      document.getElementById(
-        'childCheckButton'
-      )
-      .classList.add(
-        'hidden'
-      );
-
-
-      document.getElementById(
-        'childNextButton'
-      )
-      .classList.remove(
-        'hidden'
-      );
-    }
-
-
-    function nextChildWord() {
-
-      const game =
-        games[
-          currentGameIndex
-        ];
-
-
-      if (
-        childWordIndex <
-        game.words.length -
-        1
-      ) {
-
-        childWordIndex++;
-
-
-        renderChildWord();
-
-
-        return;
-      }
-
-
-      saveCurrentResults();
-
-
-      renderResults();
-
-
-      showScreen(
-        'resultsScreen'
-      );
-    }
-
-
-
-    function saveCurrentResults() {
-
-      const resultData = {
-
-        gameName:
-          games[
-            currentGameIndex
-          ].name,
-
-        date:
-          new Date()
-            .toLocaleDateString(
-              'en-AU'
-            ),
-
-        results:
-          currentGameResults
-
-      };
-
-
-      localStorage.setItem(
-        'spellingCardsLastResults',
-        JSON.stringify(
-          resultData
-        )
-      );
-    }
-
-
-    function openResults() {
-
-      renderResults();
-
-
-      showScreen(
-        'resultsScreen'
-      );
-    }
-
-
-    function renderResults() {
-
-      const saved =
-        JSON.parse(
-          localStorage.getItem(
-            'spellingCardsLastResults'
-          )
-        );
-
-
-      const container =
-        document.getElementById(
-          'resultsContent'
-        );
-
-
-      if (
-        !saved ||
-        !saved.results ||
-        saved.results.length ===
-        0
-      ) {
-
-        container.innerHTML = `
-
-          <div class="card">
-            No completed spelling game results yet.
-          </div>
-
-        `;
-
-
-        return;
-      }
-
-
-      const known =
-        saved.results
-          .filter(
-            item =>
-              !item.needsPractice
-          )
-          .map(
-            item =>
-              item.word
-          );
-
-
-      const practice =
-        saved.results
-          .filter(
-            item =>
-              item.needsPractice
-          )
-          .map(
-            item =>
-              item.word
-          );
-
-
-      container.innerHTML = `
-
-        <div class="card">
-
-          <h2>
-            🏆 Great work!
-          </h2>
-
-          <p>
-            You finished
-            <strong>
-              ${escapeHtml(
-                saved.gameName
-              )}
-            </strong>.
-          </p>
-
-          <p class="small">
-            ${escapeHtml(
-              saved.date
-            )}
-          </p>
-
-
-          <table class="result-table">
-
-            <thead>
-
-              <tr>
-                <th>Word</th>
-                <th>Result</th>
-                <th>Tries</th>
-              </tr>
-
-            </thead>
-
-
-            <tbody>
-
-              ${saved.results.map(
-                item => `
-
-                <tr>
-
-                  <td>
-                    ${escapeHtml(
-                      item.word
-                    )}
-                  </td>
-
-                  <td>
-                    ${escapeHtml(
-                      item.result
-                    )}
-                  </td>
-
-                  <td>
-                    ${escapeHtml(
-                      item.tries
-                    )}
-                  </td>
-
-                </tr>
-
-              `
-              ).join('')}
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-
-        <div class="card summary-good">
-
-          <h3>
-            ⭐ Words you knew well
-          </h3>
-
-          <p>
-            ${
-              known.length
-              ?
-              known
-                .map(
-                  escapeHtml
+              transaction
+                .objectStore(
+                  storeName
                 )
-                .join(', ')
-              :
-              'Keep practising.'
+                .delete(
+                  wordId
+                );
+
+
+              transaction.oncomplete =
+                function() {
+
+                  db.close();
+
+                  resolve();
+                };
+
+
+              transaction.onerror =
+                function() {
+
+                  db.close();
+
+                  reject(
+                    transaction.error
+                  );
+                };
             }
-          </p>
-
-        </div>
-
-
-        <div class="card summary-practice">
-
-          <h3>
-            🌱 Words that need extra practice
-          </h3>
-
-          <p>
-            ${
-              practice.length
-              ?
-              practice
-                .map(
-                  escapeHtml
-                )
-                .join(', ')
-              :
-              'None — great work!'
-            }
-          </p>
-
-        </div>
-
-
-        <div class="row">
-
-          <button
-            class="secondary"
-            onclick="showScreen('homeScreen')">
-            Home
-          </button>
-
-          <button
-            class="play"
-            onclick="startChildGame(currentGameIndex)">
-            Play Again
-          </button>
-
-        </div>
-
-      `;
-    }
-
-
-
-    function openCreateList() {
-
-      renderEditGameList();
-
-
-      showScreen(
-        'createScreen'
+          );
+        }
       );
-    }
+  }
 
 
-    function renderEditGameList() {
+  function saveImageBlob(
+    wordId,
+    blob
+  ) {
 
-      const container =
-        document.getElementById(
-          'editGameList'
-        );
-
-
-      if (
-        games.length ===
-        0
-      ) {
-
-        container.innerHTML =
-          '<div class="card">No games yet. Create your first spelling game.</div>';
+    return putMediaBlob(
+      IMAGE_STORE,
+      wordId,
+      blob
+    );
+  }
 
 
-        return;
-      }
+  function getImageBlob(
+    wordId
+  ) {
+
+    return getMediaBlob(
+      IMAGE_STORE,
+      wordId
+    );
+  }
 
 
-      container.innerHTML =
-        games.map(
-          (game, index) => `
+  function deleteImageBlob(
+    wordId
+  ) {
 
-          <div class="card game-row">
-
-            <div>
-
-              <strong>
-                ${escapeHtml(
-                  game.name
-                )}
-              </strong>
-
-              <p>
-                ${game.words.length}
-                / 20 words
-              </p>
-
-            </div>
+    return deleteMediaBlob(
+      IMAGE_STORE,
+      wordId
+    );
+  }
 
 
-            <div class="row">
+  function saveAudioBlob(
+    wordId,
+    blob
+  ) {
 
-              <button
-                class="edit-button"
-                onclick="openEditor(${index})">
-                Edit
-              </button>
-
-              <button
-                class="danger"
-                onclick="deleteGame(${index})">
-                Delete
-              </button>
-
-            </div>
-
-          </div>
-
-        `
-        ).join('');
-    }
+    return putMediaBlob(
+      AUDIO_STORE,
+      wordId,
+      blob
+    );
+  }
 
 
-    function createNewGame() {
+  function getAudioBlob(
+    wordId
+  ) {
 
-      if (
-        games.length >=
-        20
-      ) {
-
-        alert(
-          'You can save up to 20 spelling games.'
-        );
-
-
-        return;
-      }
+    return getMediaBlob(
+      AUDIO_STORE,
+      wordId
+    );
+  }
 
 
-      games.push({
+  function deleteAudioBlob(
+    wordId
+  ) {
 
-        id:
-          makeId(
-            'game'
-          ),
-
-        name:
-          'New Spelling Game',
-
-        words:
-          []
-
-      });
+    return deleteMediaBlob(
+      AUDIO_STORE,
+      wordId
+    );
+  }
 
 
-      saveGames();
+
+  /* =====================================
+     OBJECT URL MANAGEMENT
+  ===================================== */
+
+  const mediaObjectUrls =
+    new Map();
 
 
-      currentGameIndex =
-        games.length -
-        1;
+  function clearMediaElement(
+    element
+  ) {
 
-
-      openEditor(
-        currentGameIndex
+    const oldUrl =
+      mediaObjectUrls.get(
+        element.id
       );
-    }
 
 
-    async function deleteGame(
-      index
+    if (
+      oldUrl
     ) {
 
+      URL.revokeObjectURL(
+        oldUrl
+      );
+
+
+      mediaObjectUrls.delete(
+        element.id
+      );
+    }
+
+
+    element.removeAttribute(
+      'src'
+    );
+  }
+
+
+  async function displayWordImage(
+    wordId,
+    elementId
+  ) {
+
+    const element =
+      document.getElementById(
+        elementId
+      );
+
+
+    if (
+      !element
+    ) {
+
+      return false;
+    }
+
+
+    clearMediaElement(
+      element
+    );
+
+
+    element.classList.add(
+      'hidden'
+    );
+
+
+    try {
+
+      const blob =
+        await getImageBlob(
+          wordId
+        );
+
+
       if (
-        !confirm(
-          'Delete this spelling game?'
-        )
+        !blob
       ) {
 
-        return;
+        return false;
       }
 
 
-      const game =
-        games[
-          index
-        ];
+      const url =
+        URL.createObjectURL(
+          blob
+        );
 
 
-      for (
-        const word of
-        game.words
+      mediaObjectUrls.set(
+        element.id,
+        url
+      );
+
+
+      element.src =
+        url;
+
+
+      element.classList.remove(
+        'hidden'
+      );
+
+
+      return true;
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      return false;
+    }
+  }
+
+
+  async function displayWordAudio(
+    wordId,
+    elementId
+  ) {
+
+    const element =
+      document.getElementById(
+        elementId
+      );
+
+
+    if (
+      !element
+    ) {
+
+      return false;
+    }
+
+
+    clearMediaElement(
+      element
+    );
+
+
+    try {
+
+      const blob =
+        await getAudioBlob(
+          wordId
+        );
+
+
+      if (
+        !blob
       ) {
 
-        try {
+        return false;
+      }
 
-          await deleteImageBlob(
-            word.id
-          );
 
-        } catch (error) {
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+
+      mediaObjectUrls.set(
+        element.id,
+        url
+      );
+
+
+      element.src =
+        url;
+
+
+      return true;
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      return false;
+    }
+  }
+
+
+  function playSavedAudio(
+    elementId
+  ) {
+
+    const audio =
+      document.getElementById(
+        elementId
+      );
+
+
+    if (
+      !audio ||
+      !audio.src
+    ) {
+
+      return;
+    }
+
+
+    audio.currentTime =
+      0;
+
+
+    audio.play()
+      .catch(
+        error => {
 
           console.error(
             error
           );
         }
-      }
-
-
-      games.splice(
-        index,
-        1
       );
+  }
 
 
-      saveGames();
 
+  /* =====================================
+     IMAGE RESIZING
+  ===================================== */
 
-      renderEditGameList();
-    }
+  function resizeImageFile(file) {
 
+    return new Promise(
+      (resolve, reject) => {
 
+        const reader =
+          new FileReader();
 
-    function openEditor(
-      index
-    ) {
 
-      currentGameIndex =
-        index;
+        reader.onload =
+          function() {
 
+            const image =
+              new Image();
 
-      document.getElementById(
-        'gameNameInput'
-      )
-      .value =
-        games[
-          index
-        ].name;
 
+            image.onload =
+              function() {
 
-      renderWordEditor();
+                const maxSize =
+                  1200;
 
 
-      showScreen(
-        'editorScreen'
-      );
-    }
+                let width =
+                  image.width;
 
+                let height =
+                  image.height;
 
-    function saveGameName() {
 
-      const input =
-        document.getElementById(
-          'gameNameInput'
-        )
-        .value
-        .trim();
+                if (
+                  width > maxSize ||
+                  height > maxSize
+                ) {
 
+                  const scale =
+                    Math.min(
+                      maxSize / width,
+                      maxSize / height
+                    );
 
-      if (
-        !input
-      ) {
 
-        alert(
-          'Please enter a game name.'
-        );
+                  width =
+                    Math.round(
+                      width * scale
+                    );
 
 
-        return;
-      }
-
-
-      games[
-        currentGameIndex
-      ].name =
-        input;
-
-
-      saveGames();
-
-
-      alert(
-        'Game name saved.'
-      );
-    }
-
-
-    function addWord() {
-
-      const game =
-        games[
-          currentGameIndex
-        ];
-
-
-      if (
-        game.words.length >=
-        20
-      ) {
-
-        alert(
-          'You can add up to 20 words to a game.'
-        );
-
-
-        return;
-      }
-
-
-      game.words.push({
-
-        id:
-          makeId(
-            'word'
-          ),
-
-        word:
-          'New word',
-
-        hint:
-          '',
-
-        correct:
-          [],
-
-        extra:
-          []
-
-      });
-
-
-      saveGames();
-
-
-      renderWordEditor(
-        game.words.length -
-        1
-      );
-    }
-
-
-    function renderWordEditor(
-      openIndex =
-        -1
-    ) {
-
-      const game =
-        games[
-          currentGameIndex
-        ];
-
-
-      const container =
-        document.getElementById(
-          'wordEditorList'
-        );
-
-
-      document.getElementById(
-        'wordCountText'
-      )
-      .textContent =
-        game.words.length +
-        ' / 20 words';
-
-
-      if (
-        game.words.length ===
-        0
-      ) {
-
-        container.innerHTML = `
-
-          <div class="card">
-
-            No words yet.
-            Press “+ Add Word”
-            to add your first word.
-
-          </div>
-
-        `;
-
-
-        return;
-      }
-
-
-      container.innerHTML =
-        game.words.map(
-          (word, wordIndex) => `
-
-          <div class="word-box">
-
-            <button
-              class="word-header"
-              onclick="toggleWord(${wordIndex})">
-
-              <span>
-
-                ${wordIndex + 1}.
-                ${escapeHtml(
-                  word.word
-                )}
-
-              </span>
-
-              <span id="arrow-${wordIndex}">
-
-                ${
-                  wordIndex === openIndex
-                  ? '▲'
-                  : '▼'
+                  height =
+                    Math.round(
+                      height * scale
+                    );
                 }
 
-              </span>
 
-            </button>
-
-
-            <div
-              id="word-detail-${wordIndex}"
-              class="word-detail ${
-                wordIndex === openIndex
-                ? ''
-                : 'hidden'
-              }">
+                const canvas =
+                  document.createElement(
+                    'canvas'
+                  );
 
 
-              <div class="field">
-
-                <label>
-                  Word
-                </label>
-
-                <input
-                  type="text"
-                  value="${escapeAttribute(
-                    word.word
-                  )}"
-                  onchange="
-                    updateWordText(
-                      ${wordIndex},
-                      this.value
-                    )
-                  "
-                  style="width:100%">
-
-              </div>
+                canvas.width =
+                  width;
 
 
-              <div class="field">
-
-                <label>
-                  Meaning / Text Hint (optional)
-                </label>
-
-                <textarea
-                  placeholder="Add a meaning, clue or sentence if you want."
-                  onchange="
-                    updateWordHint(
-                      ${wordIndex},
-                      this.value
-                    )
-                  ">${escapeHtml(
-                    word.hint || ''
-                  )}</textarea>
-
-              </div>
+                canvas.height =
+                  height;
 
 
-              <div class="field">
-
-                <label>
-                  Picture (optional)
-                </label>
-
-                <div
-                  class="picture-editor"
-                  id="picture-drop-${word.id}"
-                  tabindex="0"
-                  ondragover="
-                    handlePictureDragOver(
-                      event
-                    )
-                  "
-                  ondragleave="
-                    handlePictureDragLeave(
-                      event
-                    )
-                  "
-                  ondrop="
-                    handlePictureDrop(
-                      event,
-                      '${word.id}',
-                      ${wordIndex}
-                    )
-                  "
-                  onpaste="
-                    handlePicturePaste(
-                      event,
-                      '${word.id}',
-                      ${wordIndex}
-                    )
-                  ">
+                const context =
+                  canvas.getContext(
+                    '2d'
+                  );
 
 
-                  <div
-                    class="picture-preview-box"
-                    onclick="
-                      document.getElementById(
-                        'picture-file-${word.id}'
-                      ).click()
-                    ">
-
-                    <span
-                      id="editor-picture-empty-${word.id}"
-                      class="small">
-
-                      Drag an image here,<br>
-                      click to choose a file,<br>
-                      or press Ctrl+V to paste
-
-                    </span>
+                context.drawImage(
+                  image,
+                  0,
+                  0,
+                  width,
+                  height
+                );
 
 
-                    <img
-                      id="editor-picture-${word.id}"
-                      class="hidden"
-                      alt="Picture for ${escapeAttribute(
-                        word.word
-                      )}">
+                canvas.toBlob(
+                  function(blob) {
 
-                  </div>
+                    if (
+                      blob
+                    ) {
 
+                      resolve(
+                        blob
+                      );
 
-                  <div class="picture-controls">
+                    } else {
 
-                    <input
-                      id="picture-file-${word.id}"
-                      class="file-input"
-                      type="file"
-                      accept="image/*"
-                      onchange="
-                        handlePictureUpload(
-                          '${word.id}',
-                          this.files[0],
-                          ${wordIndex}
+                      reject(
+                        new Error(
+                          'Could not prepare image.'
                         )
-                      ">
+                      );
+                    }
+                  },
+
+                  'image/jpeg',
+                  0.82
+                );
+              };
 
 
-                    <button
-                      class="danger"
-                      onclick="
-                        removeWordPicture(
-                          '${word.id}',
-                          ${wordIndex}
-                        )
-                      ">
-                      Remove Picture
-                    </button>
+            image.onerror =
+              function() {
+
+                reject(
+                  new Error(
+                    'The picture could not be opened.'
+                  )
+                );
+              };
 
 
-                    <div class="small">
-
-                      You can choose,
-                      drag and drop,
-                      or paste an image.
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
+            image.src =
+              reader.result;
+          };
 
 
-              <div class="field">
+        reader.onerror =
+          function() {
 
-                <label>
-                  Correct Sound Cards
-                </label>
-
-                <div>
-
-                  ${renderEditableCards(
-                    word.correct,
-                    wordIndex,
-                    'correct'
-                  )}
-
-                </div>
+            reject(
+              reader.error
+            );
+          };
 
 
-                <div class="add-card-row">
-
-                  <input
-                    id="new-correct-text-${wordIndex}"
-                    placeholder="Card text">
-
-                  <select
-                    id="new-correct-colour-${wordIndex}">
-
-                    ${renderColourOptions()}
-
-                  </select>
-
-                  <button
-                    class="secondary"
-                    onclick="
-                      addSoundCard(
-                        ${wordIndex},
-                        'correct'
-                      )
-                    ">
-                    + Add Card
-                  </button>
-
-                </div>
-
-              </div>
+        reader.readAsDataURL(
+          file
+        );
+      }
+    );
+  }
 
 
-              <div class="field">
 
-                <label>
-                  Extra Cards (optional)
-                </label>
+  /* =====================================
+     COLOURS
+  ===================================== */
 
-                <div>
-
-                  ${renderEditableCards(
-                    word.extra,
-                    wordIndex,
-                    'extra'
-                  )}
-
-                </div>
+  const colourOptions = [
+    'green',
+    'blue',
+    'yellow',
+    'purple',
+    'pink'
+  ];
 
 
-                <div class="add-card-row">
+  const defaultColourMeanings = {
 
-                  <input
-                    id="new-extra-text-${wordIndex}"
-                    placeholder="Extra card">
+    green:
+      'First letter of the word and each syllable',
 
-                  <select
-                    id="new-extra-colour-${wordIndex}">
+    blue:
+      'Other consonant',
 
-                    ${renderColourOptions()}
+    yellow:
+      'Vowel',
 
-                  </select>
+    purple:
+      'Letter/pattern of the week',
 
-                  <button
-                    class="secondary"
-                    onclick="
-                      addSoundCard(
-                        ${wordIndex},
-                        'extra'
-                      )
-                    ">
-                    + Add Extra Card
-                  </button>
+    pink:
+      'Last letter'
 
-                </div>
-
-              </div>
+  };
 
 
-              <div class="row">
+  let colourMeanings =
+    JSON.parse(
+      localStorage.getItem(
+        'spellingCardsColourMeanings'
+      )
+    );
 
-                <button
-                  class="preview-button"
-                  onclick="
-                    openPreview(
-                      ${wordIndex}
-                    )
-                  ">
-                  Preview Word
-                </button>
 
-                <button
-                  class="danger"
-                  onclick="
-                    deleteWord(
-                      ${wordIndex}
-                    )
-                  ">
-                  Delete Word
-                </button>
+  if (
+    !colourMeanings
+  ) {
 
-              </div>
+    colourMeanings = {
+      ...defaultColourMeanings
+    };
 
-            </div>
 
+    saveColourMeaningsToStorage();
+  }
+
+
+  function saveColourMeaningsToStorage() {
+
+    localStorage.setItem(
+      'spellingCardsColourMeanings',
+      JSON.stringify(
+        colourMeanings
+      )
+    );
+  }
+
+
+  function toggleColourMeanings() {
+
+    const panel =
+      document.getElementById(
+        'colourMeaningPanel'
+      );
+
+
+    panel.classList.toggle(
+      'hidden'
+    );
+
+
+    if (
+      !panel.classList.contains(
+        'hidden'
+      )
+    ) {
+
+      renderColourMeaningInputs();
+    }
+  }
+
+
+  function renderColourMeaningInputs() {
+
+    const container =
+      document.getElementById(
+        'colourMeaningInputs'
+      );
+
+
+    container.innerHTML =
+      colourOptions.map(
+        colour => `
+
+        <div class="colour-meaning-row">
+
+          <div class="colour-label ${colour}">
+            ${capitalise(colour)}
           </div>
 
-        `
-        ).join('');
-
-
-      loadEditorPictures();
-    }
-
-
-
-    async function loadEditorPictures() {
-
-      const game =
-        games[
-          currentGameIndex
-        ];
-
-
-      for (
-        const word of
-        game.words
-      ) {
-
-        const found =
-          await displayWordImage(
-            word.id,
-            `editor-picture-${word.id}`
-          );
-
-
-        const empty =
-          document.getElementById(
-            `editor-picture-empty-${word.id}`
-          );
-
-
-        if (
-          empty
-        ) {
-
-          if (
-            found
-          ) {
-
-            empty.classList.add(
-              'hidden'
-            );
-
-          } else {
-
-            empty.classList.remove(
-              'hidden'
-            );
-          }
-        }
-      }
-    }
-
-
-
-    function handlePictureDragOver(
-      event
-    ) {
-
-      event.preventDefault();
-
-
-      event.currentTarget
-        .classList.add(
-          'dragging'
-        );
-    }
-
-
-    function handlePictureDragLeave(
-      event
-    ) {
-
-      event.currentTarget
-        .classList.remove(
-          'dragging'
-        );
-    }
-
-
-    async function handlePictureDrop(
-      event,
-      wordId,
-      wordIndex
-    ) {
-
-      event.preventDefault();
-
-
-      event.currentTarget
-        .classList.remove(
-          'dragging'
-        );
-
-
-      const files =
-        event.dataTransfer.files;
-
-
-      if (
-        !files ||
-        files.length ===
-        0
-      ) {
-
-        return;
-      }
-
-
-      const file =
-        files[0];
-
-
-      await handlePictureUpload(
-        wordId,
-        file,
-        wordIndex
-      );
-    }
-
-
-    async function handlePicturePaste(
-      event,
-      wordId,
-      wordIndex
-    ) {
-
-      const items =
-        event.clipboardData?.items;
-
-
-      if (
-        !items
-      ) {
-
-        return;
-      }
-
-
-      for (
-        const item of
-        items
-      ) {
-
-        if (
-          item.type &&
-          item.type.startsWith(
-            'image/'
-          )
-        ) {
-
-          event.preventDefault();
-
-
-          const file =
-            item.getAsFile();
-
-
-          if (
-            file
-          ) {
-
-            await handlePictureUpload(
-              wordId,
-              file,
-              wordIndex
-            );
-          }
-
-
-          return;
-        }
-      }
-    }
-
-
-    async function handlePictureUpload(
-      wordId,
-      file,
-      wordIndex
-    ) {
-
-      if (
-        !file
-      ) {
-
-        return;
-      }
-
-
-      if (
-        !file.type ||
-        !file.type.startsWith(
-          'image/'
-        )
-      ) {
-
-        alert(
-          'Please choose, drop or paste an image file.'
-        );
-
-
-        return;
-      }
-
-
-      try {
-
-        const resizedBlob =
-          await resizeImageFile(
-            file
-          );
-
-
-        await saveImageBlob(
-          wordId,
-          resizedBlob
-        );
-
-
-        alert(
-          'Picture saved.'
-        );
-
-
-        renderWordEditor(
-          wordIndex
-        );
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
-
-        alert(
-          'The picture could not be saved. Try a different image.'
-        );
-      }
-    }
-
-
-    async function removeWordPicture(
-      wordId,
-      wordIndex
-    ) {
-
-      try {
-
-        await deleteImageBlob(
-          wordId
-        );
-
-
-        renderWordEditor(
-          wordIndex
-        );
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
-
-        alert(
-          'The picture could not be removed.'
-        );
-      }
-    }
-
-
-
-    function renderEditableCards(
-      cards,
-      wordIndex,
-      type
-    ) {
-
-      if (
-        cards.length ===
-        0
-      ) {
-
-        return `
-
-          <p class="small">
-            No cards added yet.
-          </p>
-
-        `;
-      }
-
-
-      return cards.map(
-        (card, cardIndex) => `
-
-        <div class="card-editor">
-
           <input
+            id="meaning-${colour}"
+            type="text"
             value="${escapeAttribute(
-              card.text
-            )}"
-            onchange="
-              updateCard(
-                ${wordIndex},
-                '${type}',
-                ${cardIndex},
-                'text',
-                this.value
-              )
-            ">
+              colourMeanings[colour] || ''
+            )}">
+
+        </div>
+
+      `
+      ).join('');
+  }
 
 
-          <select
-            onchange="
-              updateCard(
-                ${wordIndex},
-                '${type}',
-                ${cardIndex},
-                'colour',
-                this.value
-              )
-            ">
+  function saveColourMeanings() {
 
-            ${renderColourOptions(
-              card.colour
-            )}
+    colourOptions.forEach(
+      colour => {
 
-          </select>
+        const input =
+          document.getElementById(
+            `meaning-${colour}`
+          );
+
+
+        if (
+          input
+        ) {
+
+          colourMeanings[colour] =
+            input.value.trim();
+        }
+      }
+    );
+
+
+    saveColourMeaningsToStorage();
+
+
+    alert(
+      'Colour meanings saved.'
+    );
+
+
+    document.getElementById(
+      'colourMeaningPanel'
+    )
+    .classList.add(
+      'hidden'
+    );
+  }
+
+
+  function renderColourOptions(
+    selected = 'green'
+  ) {
+
+    return colourOptions.map(
+      colour => `
+
+        <option
+          value="${colour}"
+          ${
+            colour === selected
+            ? 'selected'
+            : ''
+          }>
+
+          ${capitalise(colour)}
+          – ${escapeHtml(
+            colourMeanings[colour] || ''
+          )}
+
+        </option>
+
+      `
+    ).join('');
+  }
+
+
+
+  /* =====================================
+     SAVED GAMES
+  ===================================== */
+
+  let games =
+    JSON.parse(
+      localStorage.getItem(
+        'spellingCardsGames'
+      )
+    );
+
+
+  if (
+    !games
+  ) {
+
+    games = [
+
+      {
+        id:
+          makeId('game'),
+
+        name:
+          'Week 1 – ar sound',
+
+        words: [
+
+          {
+            id:
+              makeId('word'),
+
+            word:
+              'car',
+
+            hint:
+              '',
+
+            correct: [
+
+              {
+                text:
+                  'c',
+
+                colour:
+                  'green'
+              },
+
+              {
+                text:
+                  'ar',
+
+                colour:
+                  'purple'
+              }
+
+            ],
+
+            extra: [
+
+              {
+                text:
+                  'or',
+
+                colour:
+                  'purple'
+              }
+
+            ]
+          },
+
+
+          {
+            id:
+              makeId('word'),
+
+            word:
+              'farm',
+
+            hint:
+              'A place where animals or crops may be raised.',
+
+            correct: [
+
+              {
+                text:
+                  'f',
+
+                colour:
+                  'green'
+              },
+
+              {
+                text:
+                  'ar',
+
+                colour:
+                  'purple'
+              },
+
+              {
+                text:
+                  'm',
+
+                colour:
+                  'pink'
+              }
+
+            ],
+
+            extra: [
+
+              {
+                text:
+                  'b',
+
+                colour:
+                  'green'
+              },
+
+              {
+                text:
+                  'a',
+
+                colour:
+                  'purple'
+              }
+
+            ]
+          },
+
+
+          {
+            id:
+              makeId('word'),
+
+            word:
+              'start',
+
+            hint:
+              '',
+
+            correct: [
+
+              {
+                text:
+                  'st',
+
+                colour:
+                  'green'
+              },
+
+              {
+                text:
+                  'ar',
+
+                colour:
+                  'purple'
+              },
+
+              {
+                text:
+                  't',
+
+                colour:
+                  'pink'
+              }
+
+            ],
+
+            extra: [
+
+              {
+                text:
+                  's',
+
+                colour:
+                  'green'
+              },
+
+              {
+                text:
+                  'or',
+
+                colour:
+                  'purple'
+              }
+
+            ]
+          }
+
+        ]
+      }
+
+    ];
+
+
+    saveGames();
+  }
+
+
+  function saveGames() {
+
+    localStorage.setItem(
+      'spellingCardsGames',
+      JSON.stringify(
+        games
+      )
+    );
+  }
+
+
+  function ensureIds() {
+
+    let changed =
+      false;
+
+
+    games.forEach(
+      game => {
+
+        if (
+          !game.id
+        ) {
+
+          game.id =
+            makeId(
+              'game'
+            );
+
+
+          changed =
+            true;
+        }
+
+
+        game.words.forEach(
+          word => {
+
+            if (
+              !word.id
+            ) {
+
+              word.id =
+                makeId(
+                  'word'
+                );
+
+
+              changed =
+                true;
+            }
+
+
+            if (
+              typeof word.hint !==
+              'string'
+            ) {
+
+              word.hint =
+                '';
+
+
+              changed =
+                true;
+            }
+          }
+        );
+      }
+    );
+
+
+    if (
+      changed
+    ) {
+
+      saveGames();
+    }
+  }
+
+
+  ensureIds();
+
+
+
+  /* =====================================
+     STATE
+  ===================================== */
+
+  let currentGameIndex =
+    0;
+
+  let currentPreviewWordIndex =
+    0;
+
+  let previewSelected =
+    [];
+
+  let childWordIndex =
+    0;
+
+  let childSelected =
+    [];
+
+  let childAttempts =
+    0;
+
+  let childWordFinished =
+    false;
+
+  let currentGameResults =
+    [];
+
+
+  let activeRecorder =
+    null;
+
+  let activeRecordingStream =
+    null;
+
+  let activeRecordingChunks =
+    [];
+
+  let activeRecordingWordId =
+    null;
+
+  let activeRecordingWordIndex =
+    null;
+
+  let recordingSeconds =
+    0;
+
+  let recordingInterval =
+    null;
+
+  let recordingTimeout =
+    null;
+
+
+
+  /* =====================================
+     NAVIGATION
+  ===================================== */
+
+  function showScreen(
+    screenId
+  ) {
+
+    document.querySelectorAll(
+      '.screen'
+    )
+    .forEach(
+      screen => {
+
+        screen.classList.add(
+          'hidden'
+        );
+      }
+    );
+
+
+    document.getElementById(
+      screenId
+    )
+    .classList.remove(
+      'hidden'
+    );
+
+
+    window.scrollTo(
+      0,
+      0
+    );
+  }
+
+
+
+  /* =====================================
+     HELP
+  ===================================== */
+
+  function openHelp() {
+
+    showScreen(
+      'helpScreen'
+    );
+
+
+    showChildHelp();
+  }
+
+
+  function showChildHelp() {
+
+    document.getElementById(
+      'childHelp'
+    )
+    .classList.remove(
+      'hidden'
+    );
+
+
+    document.getElementById(
+      'adultHelp'
+    )
+    .classList.add(
+      'hidden'
+    );
+
+
+    document.getElementById(
+      'childTab'
+    )
+    .classList.add(
+      'active'
+    );
+
+
+    document.getElementById(
+      'adultTab'
+    )
+    .classList.remove(
+      'active'
+    );
+  }
+
+
+  function showAdultHelp() {
+
+    document.getElementById(
+      'adultHelp'
+    )
+    .classList.remove(
+      'hidden'
+    );
+
+
+    document.getElementById(
+      'childHelp'
+    )
+    .classList.add(
+      'hidden'
+    );
+
+
+    document.getElementById(
+      'adultTab'
+    )
+    .classList.add(
+      'active'
+    );
+
+
+    document.getElementById(
+      'childTab'
+    )
+    .classList.remove(
+      'active'
+    );
+  }
+
+
+
+  /* =====================================
+     PLAY LIST
+  ===================================== */
+
+  function openPlayList() {
+
+    renderPlayGameList();
+
+
+    showScreen(
+      'playScreen'
+    );
+  }
+
+
+  function renderPlayGameList() {
+
+    const container =
+      document.getElementById(
+        'playGameList'
+      );
+
+
+    if (
+      games.length ===
+      0
+    ) {
+
+      container.innerHTML =
+        '<div class="card">No spelling games have been created yet.</div>';
+
+
+      return;
+    }
+
+
+    container.innerHTML =
+      games.map(
+        (game, index) => `
+
+        <div class="card game-row">
+
+          <div>
+
+            <strong>
+              ${escapeHtml(
+                game.name
+              )}
+            </strong>
+
+            <p>
+              ${game.words.length}
+              word${game.words.length === 1 ? '' : 's'}
+            </p>
+
+          </div>
 
 
           <button
-            class="danger"
-            onclick="
-              deleteCard(
-                ${wordIndex},
-                '${type}',
-                ${cardIndex}
-              )
-            ">
-            Delete
+            class="play"
+            onclick="startChildGame(${index})">
+            Play
           </button>
 
         </div>
 
       `
       ).join('');
+  }
+
+
+
+  /* =====================================
+     CHILD PLAY
+  ===================================== */
+
+  function startChildGame(
+    gameIndex
+  ) {
+
+    if (
+      games[
+        gameIndex
+      ]
+      .words.length ===
+      0
+    ) {
+
+      alert(
+        'This game does not have any words yet.'
+      );
+
+
+      return;
     }
 
 
-    function toggleWord(
-      index
+    currentGameIndex =
+      gameIndex;
+
+
+    childWordIndex =
+      0;
+
+
+    currentGameResults =
+      [];
+
+
+    renderChildWord();
+
+
+    showScreen(
+      'childPlayScreen'
+    );
+  }
+
+
+  async function renderChildWord() {
+
+    const game =
+      games[
+        currentGameIndex
+      ];
+
+
+    const word =
+      game.words[
+        childWordIndex
+      ];
+
+
+    childSelected =
+      [];
+
+
+    childAttempts =
+      0;
+
+
+    childWordFinished =
+      false;
+
+
+    document.getElementById(
+      'childGameName'
+    )
+    .innerHTML =
+      `<h2>${escapeHtml(
+        game.name
+      )}</h2>`;
+
+
+    document.getElementById(
+      'childCounter'
+    )
+    .textContent =
+      `Word ${
+        childWordIndex + 1
+      } of ${
+        game.words.length
+      }`;
+
+
+    await displayWordImage(
+      word.id,
+      'childPicture'
+    );
+
+
+    const hasAudio =
+      await displayWordAudio(
+        word.id,
+        'childAudio'
+      );
+
+
+    document.getElementById(
+      'childAudioBox'
+    )
+    .classList.toggle(
+      'hidden',
+      !hasAudio
+    );
+
+
+    const hintBox =
+      document.getElementById(
+        'childHint'
+      );
+
+
+    if (
+      word.hint &&
+      word.hint.trim()
     ) {
 
-      const detail =
-        document.getElementById(
-          `word-detail-${index}`
-        );
+      hintBox.textContent =
+        word.hint;
 
 
-      const arrow =
-        document.getElementById(
-          `arrow-${index}`
-        );
-
-
-      detail.classList.toggle(
+      hintBox.classList.remove(
         'hidden'
       );
 
+    } else {
 
-      arrow.textContent =
-        detail.classList.contains(
-          'hidden'
+      hintBox.textContent =
+        '';
+
+
+      hintBox.classList.add(
+        'hidden'
+      );
+    }
+
+
+    document.getElementById(
+      'childAnswer'
+    )
+    .innerHTML =
+      '';
+
+
+    document.getElementById(
+      'childFeedback'
+    )
+    .textContent =
+      '';
+
+
+    document.getElementById(
+      'childCheckButton'
+    )
+    .classList.remove(
+      'hidden'
+    );
+
+
+    document.getElementById(
+      'childNextButton'
+    )
+    .classList.add(
+      'hidden'
+    );
+
+
+    renderChildChoices();
+  }
+
+
+  function renderChildChoices() {
+
+    const word =
+      games[
+        currentGameIndex
+      ]
+      .words[
+        childWordIndex
+      ];
+
+
+    const choices =
+      shuffleArray([
+
+        ...word.correct.map(
+          card => ({
+            ...card
+          })
+        ),
+
+        ...word.extra.map(
+          card => ({
+            ...card
+          })
         )
-        ? '▼'
-        : '▲';
-    }
+
+      ]);
 
 
-    function expandAllWords() {
+    const container =
+      document.getElementById(
+        'childChoices'
+      );
 
-      games[
-        currentGameIndex
-      ]
-      .words
-      .forEach(
-        (word, index) => {
 
-          document.getElementById(
-            `word-detail-${index}`
-          )
-          ?.classList.remove(
-            'hidden'
+    container.innerHTML =
+      '';
+
+
+    choices.forEach(
+      card => {
+
+        const button =
+          document.createElement(
+            'button'
           );
 
 
-          const arrow =
-            document.getElementById(
-              `arrow-${index}`
+        button.className =
+          `choice-card sound-card ${card.colour}`;
+
+
+        button.textContent =
+          card.text;
+
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            if (
+              childWordFinished
+            ) {
+
+              return;
+            }
+
+
+            childSelected.push({
+
+              text:
+                card.text,
+
+              colour:
+                card.colour,
+
+              sourceButton:
+                button
+
+            });
+
+
+            button.classList.add(
+              'used'
             );
 
 
-          if (
-            arrow
-          ) {
-
-            arrow.textContent =
-              '▲';
+            renderChildAnswer();
           }
-        }
-      );
-    }
-
-
-    function collapseAllWords() {
-
-      games[
-        currentGameIndex
-      ]
-      .words
-      .forEach(
-        (word, index) => {
-
-          document.getElementById(
-            `word-detail-${index}`
-          )
-          ?.classList.add(
-            'hidden'
-          );
-
-
-          const arrow =
-            document.getElementById(
-              `arrow-${index}`
-            );
-
-
-          if (
-            arrow
-          ) {
-
-            arrow.textContent =
-              '▼';
-          }
-        }
-      );
-    }
-
-
-    function updateWordText(
-      index,
-      value
-    ) {
-
-      games[
-        currentGameIndex
-      ]
-      .words[
-        index
-      ]
-      .word =
-        value.trim()
-        ||
-        'Untitled word';
-
-
-      saveGames();
-
-
-      renderWordEditor(
-        index
-      );
-    }
-
-
-    function updateWordHint(
-      index,
-      value
-    ) {
-
-      games[
-        currentGameIndex
-      ]
-      .words[
-        index
-      ]
-      .hint =
-        value.trim();
-
-
-      saveGames();
-    }
-
-
-    function addSoundCard(
-      wordIndex,
-      type
-    ) {
-
-      const textInput =
-        document.getElementById(
-          `new-${type}-text-${wordIndex}`
         );
 
 
-      const colourInput =
-        document.getElementById(
-          `new-${type}-colour-${wordIndex}`
+        container.appendChild(
+          button
         );
-
-
-      const text =
-        textInput.value.trim();
-
-
-      if (
-        !text
-      ) {
-
-        alert(
-          'Please type something on the card first.'
-        );
-
-
-        return;
       }
+    );
+  }
 
 
+  function renderChildAnswer() {
+
+    const container =
+      document.getElementById(
+        'childAnswer'
+      );
+
+
+    container.innerHTML =
+      '';
+
+
+    childSelected.forEach(
+      (card, index) => {
+
+        const button =
+          document.createElement(
+            'button'
+          );
+
+
+        button.className =
+          `sound-card ${card.colour}`;
+
+
+        button.textContent =
+          card.text;
+
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            if (
+              childWordFinished
+            ) {
+
+              return;
+            }
+
+
+            card.sourceButton
+              ?.classList.remove(
+                'used'
+              );
+
+
+            childSelected.splice(
+              index,
+              1
+            );
+
+
+            renderChildAnswer();
+          }
+        );
+
+
+        container.appendChild(
+          button
+        );
+      }
+    );
+  }
+
+
+  function checkChildAnswer() {
+
+    if (
+      childWordFinished
+    ) {
+
+      return;
+    }
+
+
+    const word =
       games[
         currentGameIndex
       ]
       .words[
-        wordIndex
-      ][
-        type
-      ]
-      .push({
+        childWordIndex
+      ];
 
-        text:
-          text,
 
-        colour:
-          colourInput.value
+    const expected =
+      word.correct
+        .map(
+          card =>
+            card.text
+        )
+        .join('|');
+
+
+    const chosen =
+      childSelected
+        .map(
+          card =>
+            card.text
+        )
+        .join('|');
+
+
+    const feedback =
+      document.getElementById(
+        'childFeedback'
+      );
+
+
+    if (
+      chosen ===
+      expected
+    ) {
+
+      const tries =
+        childAttempts +
+        1;
+
+
+      feedback.textContent =
+        '⭐ You know your words! Great spelling!';
+
+
+      currentGameResults.push({
+
+        word:
+          word.word,
+
+        result:
+          'Great spelling!',
+
+        tries:
+          tries,
+
+        needsPractice:
+          false
 
       });
 
 
-      saveGames();
+      finishChildWord();
 
 
-      renderWordEditor(
-        wordIndex
-      );
+      return;
     }
 
 
-    function updateCard(
-      wordIndex,
-      type,
-      cardIndex,
-      field,
-      value
+    childAttempts++;
+
+
+    if (
+      childAttempts ===
+      1
     ) {
 
-      games[
-        currentGameIndex
-      ]
-      .words[
-        wordIndex
-      ][
-        type
-      ][
-        cardIndex
-      ][
-        field
-      ] =
-        value;
+      feedback.textContent =
+        '⭐ Keep going! You’re really listening to the sounds in your word.';
 
 
-      saveGames();
+      resetChildAttempt();
+
+    } else {
+
+      feedback.textContent =
+        '⭐ Nice try! Here’s the correct word:';
+
+
+      showCorrectChildAnswer();
+
+
+      currentGameResults.push({
+
+        word:
+          word.word,
+
+        result:
+          'Extra practice needed',
+
+        tries:
+          '2+',
+
+        needsPractice:
+          true
+
+      });
+
+
+      finishChildWord();
     }
+  }
 
 
-    function deleteCard(
-      wordIndex,
-      type,
-      cardIndex
-    ) {
+  function resetChildAttempt() {
 
-      games[
-        currentGameIndex
-      ]
-      .words[
-        wordIndex
-      ][
-        type
-      ]
-      .splice(
-        cardIndex,
-        1
-      );
+    childSelected =
+      [];
 
 
-      saveGames();
+    document.getElementById(
+      'childAnswer'
+    )
+    .innerHTML =
+      '';
 
 
-      renderWordEditor(
-        wordIndex
-      );
-    }
+    document.querySelectorAll(
+      '#childChoices .choice-card'
+    )
+    .forEach(
+      button => {
 
-
-    async function deleteWord(
-      index
-    ) {
-
-      if (
-        !confirm(
-          'Delete this word?'
-        )
-      ) {
-
-        return;
+        button.classList.remove(
+          'used'
+        );
       }
+    );
+  }
 
 
-      const word =
+  function showCorrectChildAnswer() {
+
+    const word =
+      games[
+        currentGameIndex
+      ]
+      .words[
+        childWordIndex
+      ];
+
+
+    const answer =
+      document.getElementById(
+        'childAnswer'
+      );
+
+
+    answer.innerHTML =
+      '';
+
+
+    word.correct.forEach(
+      card => {
+
+        const item =
+          document.createElement(
+            'div'
+          );
+
+
+        item.className =
+          `sound-card ${card.colour}`;
+
+
+        item.textContent =
+          card.text;
+
+
+        answer.appendChild(
+          item
+        );
+      }
+    );
+  }
+
+
+  function finishChildWord() {
+
+    childWordFinished =
+      true;
+
+
+    document.getElementById(
+      'childCheckButton'
+    )
+    .classList.add(
+      'hidden'
+    );
+
+
+    document.getElementById(
+      'childNextButton'
+    )
+    .classList.remove(
+      'hidden'
+    );
+  }
+
+
+  function nextChildWord() {
+
+    const game =
+      games[
+        currentGameIndex
+      ];
+
+
+    if (
+      childWordIndex <
+      game.words.length -
+      1
+    ) {
+
+      childWordIndex++;
+
+
+      renderChildWord();
+
+
+      return;
+    }
+
+
+    saveCurrentResults();
+
+
+    renderResults();
+
+
+    showScreen(
+      'resultsScreen'
+    );
+  }
+
+
+
+  /* =====================================
+     RESULTS
+  ===================================== */
+
+  function saveCurrentResults() {
+
+    const resultData = {
+
+      gameName:
         games[
           currentGameIndex
-        ]
-        .words[
-          index
-        ];
+        ].name,
 
+      date:
+        new Date()
+          .toLocaleDateString(
+            'en-AU'
+          ),
+
+      results:
+        currentGameResults
+
+    };
+
+
+    localStorage.setItem(
+      'spellingCardsLastResults',
+      JSON.stringify(
+        resultData
+      )
+    );
+  }
+
+
+  function openResults() {
+
+    renderResults();
+
+
+    showScreen(
+      'resultsScreen'
+    );
+  }
+
+
+  function renderResults() {
+
+    const saved =
+      JSON.parse(
+        localStorage.getItem(
+          'spellingCardsLastResults'
+        )
+      );
+
+
+    const container =
+      document.getElementById(
+        'resultsContent'
+      );
+
+
+    if (
+      !saved ||
+      !saved.results ||
+      saved.results.length ===
+      0
+    ) {
+
+      container.innerHTML = `
+
+        <div class="card">
+          No completed spelling game results yet.
+        </div>
+
+      `;
+
+
+      return;
+    }
+
+
+    const known =
+      saved.results
+        .filter(
+          item =>
+            !item.needsPractice
+        )
+        .map(
+          item =>
+            item.word
+        );
+
+
+    const practice =
+      saved.results
+        .filter(
+          item =>
+            item.needsPractice
+        )
+        .map(
+          item =>
+            item.word
+        );
+
+
+    container.innerHTML = `
+
+      <div class="card">
+
+        <h2>
+          🏆 Great work!
+        </h2>
+
+        <p>
+          You finished
+          <strong>
+            ${escapeHtml(
+              saved.gameName
+            )}
+          </strong>.
+        </p>
+
+        <p class="small">
+          ${escapeHtml(
+            saved.date
+          )}
+        </p>
+
+
+        <table class="result-table">
+
+          <thead>
+
+            <tr>
+              <th>Word</th>
+              <th>Result</th>
+              <th>Tries</th>
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            ${saved.results.map(
+              item => `
+
+              <tr>
+
+                <td>
+                  ${escapeHtml(
+                    item.word
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    item.result
+                  )}
+                </td>
+
+                <td>
+                  ${escapeHtml(
+                    item.tries
+                  )}
+                </td>
+
+              </tr>
+
+            `
+            ).join('')}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div class="card summary-good">
+
+        <h3>
+          ⭐ Words you knew well
+        </h3>
+
+        <p>
+          ${
+            known.length
+            ?
+            known
+              .map(
+                escapeHtml
+              )
+              .join(', ')
+            :
+            'Keep practising.'
+          }
+        </p>
+
+      </div>
+
+
+      <div class="card summary-practice">
+
+        <h3>
+          🌱 Words that need extra practice
+        </h3>
+
+        <p>
+          ${
+            practice.length
+            ?
+            practice
+              .map(
+                escapeHtml
+              )
+              .join(', ')
+            :
+            'None — great work!'
+          }
+        </p>
+
+      </div>
+
+
+      <div class="row">
+
+        <button
+          class="secondary"
+          onclick="showScreen('homeScreen')">
+          Home
+        </button>
+
+        <button
+          class="play"
+          onclick="startChildGame(currentGameIndex)">
+          Play Again
+        </button>
+
+      </div>
+
+    `;
+  }
+
+
+
+  /* =====================================
+     CREATE LIST
+  ===================================== */
+
+  function openCreateList() {
+
+    renderEditGameList();
+
+
+    showScreen(
+      'createScreen'
+    );
+  }
+
+
+  function renderEditGameList() {
+
+    const container =
+      document.getElementById(
+        'editGameList'
+      );
+
+
+    if (
+      games.length ===
+      0
+    ) {
+
+      container.innerHTML =
+        '<div class="card">No games yet. Create your first spelling game.</div>';
+
+
+      return;
+    }
+
+
+    container.innerHTML =
+      games.map(
+        (game, index) => `
+
+        <div class="card game-row">
+
+          <div>
+
+            <strong>
+              ${escapeHtml(
+                game.name
+              )}
+            </strong>
+
+            <p>
+              ${game.words.length}
+              / 20 words
+            </p>
+
+          </div>
+
+
+          <div class="row">
+
+            <button
+              class="edit-button"
+              onclick="openEditor(${index})">
+              Edit
+            </button>
+
+            <button
+              class="danger"
+              onclick="deleteGame(${index})">
+              Delete
+            </button>
+
+          </div>
+
+        </div>
+
+      `
+      ).join('');
+  }
+
+
+  function createNewGame() {
+
+    if (
+      games.length >=
+      20
+    ) {
+
+      alert(
+        'You can save up to 20 spelling games.'
+      );
+
+
+      return;
+    }
+
+
+    games.push({
+
+      id:
+        makeId(
+          'game'
+        ),
+
+      name:
+        'New Spelling Game',
+
+      words:
+        []
+
+    });
+
+
+    saveGames();
+
+
+    currentGameIndex =
+      games.length -
+      1;
+
+
+    openEditor(
+      currentGameIndex
+    );
+  }
+
+
+  async function deleteGame(
+    index
+  ) {
+
+    if (
+      !confirm(
+        'Delete this spelling game?'
+      )
+    ) {
+
+      return;
+    }
+
+
+    const game =
+      games[
+        index
+      ];
+
+
+    for (
+      const word of
+      game.words
+    ) {
 
       try {
 
         await deleteImageBlob(
+          word.id
+        );
+
+
+        await deleteAudioBlob(
           word.id
         );
 
@@ -4282,364 +3548,2143 @@
           error
         );
       }
-
-
-      games[
-        currentGameIndex
-      ]
-      .words
-      .splice(
-        index,
-        1
-      );
-
-
-      saveGames();
-
-
-      renderWordEditor();
     }
 
 
+    games.splice(
+      index,
+      1
+    );
 
-    function openPreview(
-      wordIndex
+
+    saveGames();
+
+
+    renderEditGameList();
+  }
+
+
+
+  /* =====================================
+     EDITOR
+  ===================================== */
+
+  function openEditor(
+    index
+  ) {
+
+    currentGameIndex =
+      index;
+
+
+    document.getElementById(
+      'gameNameInput'
+    )
+    .value =
+      games[
+        index
+      ].name;
+
+
+    renderWordEditor();
+
+
+    showScreen(
+      'editorScreen'
+    );
+  }
+
+
+  function saveGameName() {
+
+    const input =
+      document.getElementById(
+        'gameNameInput'
+      )
+      .value
+      .trim();
+
+
+    if (
+      !input
     ) {
 
-      currentPreviewWordIndex =
-        wordIndex;
-
-
-      renderPreview();
-
-
-      showScreen(
-        'previewScreen'
+      alert(
+        'Please enter a game name.'
       );
+
+
+      return;
     }
 
 
-    async function renderPreview() {
-
-      const game =
-        games[
-          currentGameIndex
-        ];
+    games[
+      currentGameIndex
+    ].name =
+      input;
 
 
-      const word =
-        game.words[
-          currentPreviewWordIndex
-        ];
+    saveGames();
 
 
-      await displayWordImage(
-        word.id,
-        'previewPicture'
+    alert(
+      'Game name saved.'
+    );
+  }
+
+
+  function addWord() {
+
+    const game =
+      games[
+        currentGameIndex
+      ];
+
+
+    if (
+      game.words.length >=
+      20
+    ) {
+
+      alert(
+        'You can add up to 20 words to a game.'
       );
 
 
-      const hintBox =
+      return;
+    }
+
+
+    game.words.push({
+
+      id:
+        makeId(
+          'word'
+        ),
+
+      word:
+        'New word',
+
+      hint:
+        '',
+
+      correct:
+        [],
+
+      extra:
+        []
+
+    });
+
+
+    saveGames();
+
+
+    renderWordEditor(
+      game.words.length -
+      1
+    );
+  }
+
+
+  function renderWordEditor(
+    openIndex =
+      -1
+  ) {
+
+    const game =
+      games[
+        currentGameIndex
+      ];
+
+
+    const container =
+      document.getElementById(
+        'wordEditorList'
+      );
+
+
+    document.getElementById(
+      'wordCountText'
+    )
+    .textContent =
+      game.words.length +
+      ' / 20 words';
+
+
+    if (
+      game.words.length ===
+      0
+    ) {
+
+      container.innerHTML = `
+
+        <div class="card">
+
+          No words yet.
+          Press “+ Add Word”
+          to add your first word.
+
+        </div>
+
+      `;
+
+
+      return;
+    }
+
+
+    container.innerHTML =
+      game.words.map(
+        (word, wordIndex) => `
+
+        <div class="word-box">
+
+          <button
+            class="word-header"
+            onclick="toggleWord(${wordIndex})">
+
+            <span>
+
+              ${wordIndex + 1}.
+              ${escapeHtml(
+                word.word
+              )}
+
+            </span>
+
+            <span id="arrow-${wordIndex}">
+
+              ${
+                wordIndex === openIndex
+                ? '▲'
+                : '▼'
+              }
+
+            </span>
+
+          </button>
+
+
+          <div
+            id="word-detail-${wordIndex}"
+            class="word-detail ${
+              wordIndex === openIndex
+              ? ''
+              : 'hidden'
+            }">
+
+
+            <div class="field">
+
+              <label>
+                Word
+              </label>
+
+              <input
+                type="text"
+                value="${escapeAttribute(
+                  word.word
+                )}"
+                onchange="
+                  updateWordText(
+                    ${wordIndex},
+                    this.value
+                  )
+                "
+                style="width:100%">
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Meaning / Text Hint (optional)
+              </label>
+
+              <textarea
+                placeholder="Add a meaning, clue or sentence if you want."
+                onchange="
+                  updateWordHint(
+                    ${wordIndex},
+                    this.value
+                  )
+                ">${escapeHtml(
+                  word.hint || ''
+                )}</textarea>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Picture (optional)
+              </label>
+
+              <div
+                class="picture-editor"
+                id="picture-drop-${word.id}"
+                tabindex="0"
+
+                ondragover="
+                  handlePictureDragOver(
+                    event
+                  )
+                "
+
+                ondragleave="
+                  handlePictureDragLeave(
+                    event
+                  )
+                "
+
+                ondrop="
+                  handlePictureDrop(
+                    event,
+                    '${word.id}',
+                    ${wordIndex}
+                  )
+                "
+
+                onpaste="
+                  handlePicturePaste(
+                    event,
+                    '${word.id}',
+                    ${wordIndex}
+                  )
+                ">
+
+
+                <div
+                  class="picture-preview-box"
+
+                  onclick="
+                    document.getElementById(
+                      'picture-file-${word.id}'
+                    ).click()
+                  ">
+
+
+                  <span
+                    id="editor-picture-empty-${word.id}"
+                    class="small">
+
+                    Drag an image here,<br>
+                    click to choose a file,<br>
+                    or press Ctrl+V to paste
+
+                  </span>
+
+
+                  <img
+                    id="editor-picture-${word.id}"
+                    class="hidden"
+                    alt="Picture for ${escapeAttribute(
+                      word.word
+                    )}">
+
+                </div>
+
+
+                <div class="picture-controls">
+
+                  <input
+                    id="picture-file-${word.id}"
+                    class="file-input"
+                    type="file"
+                    accept="image/*"
+
+                    onchange="
+                      handlePictureUpload(
+                        '${word.id}',
+                        this.files[0],
+                        ${wordIndex}
+                      )
+                    ">
+
+
+                  <button
+                    class="danger"
+
+                    onclick="
+                      removeWordPicture(
+                        '${word.id}',
+                        ${wordIndex}
+                      )
+                    ">
+
+                    Remove Picture
+
+                  </button>
+
+
+                  <div class="small">
+                    Choose, drag and drop, or paste an image.
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Voice Recording (optional)
+              </label>
+
+
+              <div class="audio-editor">
+
+                <div class="audio-buttons">
+
+                  <button
+                    id="record-button-${word.id}"
+                    class="record-button"
+
+                    onclick="
+                      startWordRecording(
+                        '${word.id}',
+                        ${wordIndex}
+                      )
+                    ">
+
+                    🎤 Record
+
+                  </button>
+
+
+                  <button
+                    id="stop-button-${word.id}"
+                    class="stop-button"
+                    disabled
+
+                    onclick="
+                      stopWordRecording()
+                    ">
+
+                    ⏹ Stop
+
+                  </button>
+
+
+                  <button
+                    class="danger"
+
+                    onclick="
+                      removeWordAudio(
+                        '${word.id}',
+                        ${wordIndex}
+                      )
+                    ">
+
+                    Remove Recording
+
+                  </button>
+
+                </div>
+
+
+                <div
+                  id="record-status-${word.id}"
+                  class="audio-status small">
+
+                  Maximum recording time: 30 seconds
+
+                </div>
+
+
+                <audio
+                  id="editor-audio-${word.id}"
+                  class="audio-preview hidden"
+                  controls>
+                </audio>
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Correct Sound Cards
+              </label>
+
+              <div>
+
+                ${renderEditableCards(
+                  word.correct,
+                  wordIndex,
+                  'correct'
+                )}
+
+              </div>
+
+
+              <div class="add-card-row">
+
+                <input
+                  id="new-correct-text-${wordIndex}"
+                  placeholder="Card text">
+
+                <select
+                  id="new-correct-colour-${wordIndex}">
+
+                  ${renderColourOptions()}
+
+                </select>
+
+                <button
+                  class="secondary"
+
+                  onclick="
+                    addSoundCard(
+                      ${wordIndex},
+                      'correct'
+                    )
+                  ">
+
+                  + Add Card
+
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
+                Extra Cards (optional)
+              </label>
+
+              <div>
+
+                ${renderEditableCards(
+                  word.extra,
+                  wordIndex,
+                  'extra'
+                )}
+
+              </div>
+
+
+              <div class="add-card-row">
+
+                <input
+                  id="new-extra-text-${wordIndex}"
+                  placeholder="Extra card">
+
+                <select
+                  id="new-extra-colour-${wordIndex}">
+
+                  ${renderColourOptions()}
+
+                </select>
+
+                <button
+                  class="secondary"
+
+                  onclick="
+                    addSoundCard(
+                      ${wordIndex},
+                      'extra'
+                    )
+                  ">
+
+                  + Add Extra Card
+
+                </button>
+
+              </div>
+
+            </div>
+
+
+            <div class="row">
+
+              <button
+                class="preview-button"
+
+                onclick="
+                  openPreview(
+                    ${wordIndex}
+                  )
+                ">
+
+                Preview Word
+
+              </button>
+
+
+              <button
+                class="danger"
+
+                onclick="
+                  deleteWord(
+                    ${wordIndex}
+                  )
+                ">
+
+                Delete Word
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      `
+      ).join('');
+
+
+    loadEditorMedia();
+  }
+
+
+
+  /* =====================================
+     PICTURES
+  ===================================== */
+
+  async function loadEditorMedia() {
+
+    const game =
+      games[
+        currentGameIndex
+      ];
+
+
+    for (
+      const word of
+      game.words
+    ) {
+
+      const pictureFound =
+        await displayWordImage(
+          word.id,
+          `editor-picture-${word.id}`
+        );
+
+
+      const empty =
         document.getElementById(
-          'previewHint'
+          `editor-picture-empty-${word.id}`
         );
 
 
       if (
-        word.hint &&
-        word.hint.trim()
+        empty
       ) {
 
-        hintBox.textContent =
-          word.hint;
-
-
-        hintBox.classList.remove(
-          'hidden'
-        );
-
-      } else {
-
-        hintBox.textContent =
-          '';
-
-
-        hintBox.classList.add(
-          'hidden'
+        empty.classList.toggle(
+          'hidden',
+          pictureFound
         );
       }
 
 
-      previewSelected =
-        [];
-
-
-      document.getElementById(
-        'previewCounter'
-      )
-      .textContent =
-        `Word ${
-          currentPreviewWordIndex + 1
-        } of ${
-          game.words.length
-        }`;
-
-
-      document.getElementById(
-        'previewAnswer'
-      )
-      .innerHTML =
-        '';
-
-
-      document.getElementById(
-        'previewFeedback'
-      )
-      .textContent =
-        '';
-
-
-      const choices =
-        shuffleArray([
-
-          ...word.correct.map(
-            card => ({
-              ...card
-            })
-          ),
-
-          ...word.extra.map(
-            card => ({
-              ...card
-            })
-          )
-
-        ]);
-
-
-      const container =
-        document.getElementById(
-          'previewChoices'
+      const audioFound =
+        await displayWordAudio(
+          word.id,
+          `editor-audio-${word.id}`
         );
 
 
-      container.innerHTML =
-        '';
+      const audioElement =
+        document.getElementById(
+          `editor-audio-${word.id}`
+        );
 
 
-      choices.forEach(
-        card => {
+      if (
+        audioElement
+      ) {
 
-          const button =
-            document.createElement(
-              'button'
+        audioElement.classList.toggle(
+          'hidden',
+          !audioFound
+        );
+      }
+
+
+      const status =
+        document.getElementById(
+          `record-status-${word.id}`
+        );
+
+
+      if (
+        status &&
+        audioFound
+      ) {
+
+        status.textContent =
+          'Recording saved. You can play it below or record a new one.';
+      }
+    }
+  }
+
+
+  function handlePictureDragOver(
+    event
+  ) {
+
+    event.preventDefault();
+
+
+    event.currentTarget
+      .classList.add(
+        'dragging'
+      );
+  }
+
+
+  function handlePictureDragLeave(
+    event
+  ) {
+
+    event.currentTarget
+      .classList.remove(
+        'dragging'
+      );
+  }
+
+
+  async function handlePictureDrop(
+    event,
+    wordId,
+    wordIndex
+  ) {
+
+    event.preventDefault();
+
+
+    event.currentTarget
+      .classList.remove(
+        'dragging'
+      );
+
+
+    const files =
+      event.dataTransfer.files;
+
+
+    if (
+      !files ||
+      files.length ===
+      0
+    ) {
+
+      return;
+    }
+
+
+    await handlePictureUpload(
+      wordId,
+      files[0],
+      wordIndex
+    );
+  }
+
+
+  async function handlePicturePaste(
+    event,
+    wordId,
+    wordIndex
+  ) {
+
+    const items =
+      event.clipboardData?.items;
+
+
+    if (
+      !items
+    ) {
+
+      return;
+    }
+
+
+    for (
+      const item of
+      items
+    ) {
+
+      if (
+        item.type &&
+        item.type.startsWith(
+          'image/'
+        )
+      ) {
+
+        event.preventDefault();
+
+
+        const file =
+          item.getAsFile();
+
+
+        if (
+          file
+        ) {
+
+          await handlePictureUpload(
+            wordId,
+            file,
+            wordIndex
+          );
+        }
+
+
+        return;
+      }
+    }
+  }
+
+
+  async function handlePictureUpload(
+    wordId,
+    file,
+    wordIndex
+  ) {
+
+    if (
+      !file
+    ) {
+
+      return;
+    }
+
+
+    if (
+      !file.type ||
+      !file.type.startsWith(
+        'image/'
+      )
+    ) {
+
+      alert(
+        'Please choose, drop or paste an image file.'
+      );
+
+
+      return;
+    }
+
+
+    try {
+
+      const resizedBlob =
+        await resizeImageFile(
+          file
+        );
+
+
+      await saveImageBlob(
+        wordId,
+        resizedBlob
+      );
+
+
+      alert(
+        'Picture saved.'
+      );
+
+
+      renderWordEditor(
+        wordIndex
+      );
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      alert(
+        'The picture could not be saved. Try a different image.'
+      );
+    }
+  }
+
+
+  async function removeWordPicture(
+    wordId,
+    wordIndex
+  ) {
+
+    try {
+
+      await deleteImageBlob(
+        wordId
+      );
+
+
+      renderWordEditor(
+        wordIndex
+      );
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      alert(
+        'The picture could not be removed.'
+      );
+    }
+  }
+
+
+
+  /* =====================================
+     AUDIO RECORDING
+  ===================================== */
+
+  function chooseRecordingMimeType() {
+
+    if (
+      typeof MediaRecorder ===
+      'undefined'
+    ) {
+
+      return '';
+    }
+
+
+    const options = [
+
+      'audio/mp4',
+
+      'audio/webm;codecs=opus',
+
+      'audio/webm',
+
+      'audio/ogg;codecs=opus'
+
+    ];
+
+
+    for (
+      const type of
+      options
+    ) {
+
+      if (
+        MediaRecorder
+          .isTypeSupported(
+            type
+          )
+      ) {
+
+        return type;
+      }
+    }
+
+
+    return '';
+  }
+
+
+  async function startWordRecording(
+    wordId,
+    wordIndex
+  ) {
+
+    if (
+      activeRecorder &&
+      activeRecorder.state ===
+      'recording'
+    ) {
+
+      alert(
+        'Please stop the current recording first.'
+      );
+
+
+      return;
+    }
+
+
+    if (
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia ||
+      typeof MediaRecorder ===
+      'undefined'
+    ) {
+
+      alert(
+        'Voice recording is not supported by this browser.'
+      );
+
+
+      return;
+    }
+
+
+    try {
+
+      const stream =
+        await navigator.mediaDevices
+          .getUserMedia({
+            audio: true
+          });
+
+
+      const mimeType =
+        chooseRecordingMimeType();
+
+
+      let recorder;
+
+
+      if (
+        mimeType
+      ) {
+
+        recorder =
+          new MediaRecorder(
+            stream,
+            {
+              mimeType:
+                mimeType
+            }
+          );
+
+      } else {
+
+        recorder =
+          new MediaRecorder(
+            stream
+          );
+      }
+
+
+      activeRecorder =
+        recorder;
+
+
+      activeRecordingStream =
+        stream;
+
+
+      activeRecordingChunks =
+        [];
+
+
+      activeRecordingWordId =
+        wordId;
+
+
+      activeRecordingWordIndex =
+        wordIndex;
+
+
+      recordingSeconds =
+        0;
+
+
+      const status =
+        document.getElementById(
+          `record-status-${wordId}`
+        );
+
+
+      const recordButton =
+        document.getElementById(
+          `record-button-${wordId}`
+        );
+
+
+      const stopButton =
+        document.getElementById(
+          `stop-button-${wordId}`
+        );
+
+
+      if (
+        recordButton
+      ) {
+
+        recordButton.disabled =
+          true;
+      }
+
+
+      if (
+        stopButton
+      ) {
+
+        stopButton.disabled =
+          false;
+      }
+
+
+      if (
+        status
+      ) {
+
+        status.textContent =
+          '🔴 Recording: 0 / 30 seconds';
+
+
+        status.classList.add(
+          'recording-live'
+        );
+      }
+
+
+      recorder.ondataavailable =
+        function(event) {
+
+          if (
+            event.data &&
+            event.data.size >
+            0
+          ) {
+
+            activeRecordingChunks.push(
+              event.data
+            );
+          }
+        };
+
+
+      recorder.onstop =
+        async function() {
+
+          clearRecordingTimers();
+
+
+          const finalType =
+            recorder.mimeType ||
+            mimeType ||
+            'audio/webm';
+
+
+          const blob =
+            new Blob(
+              activeRecordingChunks,
+              {
+                type:
+                  finalType
+              }
             );
 
 
-          button.className =
-            `choice-card sound-card ${card.colour}`;
+          stopMicrophoneStream();
 
 
-          button.textContent =
-            card.text;
+          try {
+
+            if (
+              blob.size >
+              0
+            ) {
+
+              await saveAudioBlob(
+                wordId,
+                blob
+              );
 
 
-          button.addEventListener(
-            'click',
-            () => {
+              alert(
+                'Voice recording saved.'
+              );
 
-              previewSelected.push({
+            } else {
 
-                text:
-                  card.text,
+              alert(
+                'No audio was recorded. Please try again.'
+              );
+            }
 
-                colour:
-                  card.colour,
+          } catch (error) {
 
-                sourceButton:
-                  button
-
-              });
+            console.error(
+              error
+            );
 
 
-              button.classList.add(
+            alert(
+              'The voice recording could not be saved.'
+            );
+          }
+
+
+          activeRecorder =
+            null;
+
+
+          activeRecordingChunks =
+            [];
+
+
+          activeRecordingWordId =
+            null;
+
+
+          activeRecordingWordIndex =
+            null;
+
+
+          renderWordEditor(
+            wordIndex
+          );
+        };
+
+
+      recorder.start();
+
+
+      recordingInterval =
+        setInterval(
+          function() {
+
+            recordingSeconds++;
+
+
+            const currentStatus =
+              document.getElementById(
+                `record-status-${wordId}`
+              );
+
+
+            if (
+              currentStatus
+            ) {
+
+              currentStatus.textContent =
+                `🔴 Recording: ${recordingSeconds} / 30 seconds`;
+            }
+
+          },
+          1000
+        );
+
+
+      recordingTimeout =
+        setTimeout(
+          function() {
+
+            if (
+              activeRecorder &&
+              activeRecorder.state ===
+              'recording'
+            ) {
+
+              activeRecorder.stop();
+            }
+
+          },
+          30000
+        );
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      stopMicrophoneStream();
+
+
+      alert(
+        'Microphone access was not available. Check that your browser has permission to use the microphone.'
+      );
+    }
+  }
+
+
+  function stopWordRecording() {
+
+    if (
+      activeRecorder &&
+      activeRecorder.state ===
+      'recording'
+    ) {
+
+      activeRecorder.stop();
+    }
+  }
+
+
+  function clearRecordingTimers() {
+
+    if (
+      recordingInterval
+    ) {
+
+      clearInterval(
+        recordingInterval
+      );
+
+
+      recordingInterval =
+        null;
+    }
+
+
+    if (
+      recordingTimeout
+    ) {
+
+      clearTimeout(
+        recordingTimeout
+      );
+
+
+      recordingTimeout =
+        null;
+    }
+  }
+
+
+  function stopMicrophoneStream() {
+
+    if (
+      activeRecordingStream
+    ) {
+
+      activeRecordingStream
+        .getTracks()
+        .forEach(
+          track => {
+
+            track.stop();
+          }
+        );
+
+
+      activeRecordingStream =
+        null;
+    }
+  }
+
+
+  async function removeWordAudio(
+    wordId,
+    wordIndex
+  ) {
+
+    if (
+      activeRecordingWordId ===
+      wordId &&
+      activeRecorder &&
+      activeRecorder.state ===
+      'recording'
+    ) {
+
+      activeRecorder.stop();
+    }
+
+
+    try {
+
+      await deleteAudioBlob(
+        wordId
+      );
+
+
+      renderWordEditor(
+        wordIndex
+      );
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+
+      alert(
+        'The recording could not be removed.'
+      );
+    }
+  }
+
+
+
+  /* =====================================
+     SOUND CARDS
+  ===================================== */
+
+  function renderEditableCards(
+    cards,
+    wordIndex,
+    type
+  ) {
+
+    if (
+      cards.length ===
+      0
+    ) {
+
+      return `
+
+        <p class="small">
+          No cards added yet.
+        </p>
+
+      `;
+    }
+
+
+    return cards.map(
+      (card, cardIndex) => `
+
+      <div class="card-editor">
+
+        <input
+          value="${escapeAttribute(
+            card.text
+          )}"
+
+          onchange="
+            updateCard(
+              ${wordIndex},
+              '${type}',
+              ${cardIndex},
+              'text',
+              this.value
+            )
+          ">
+
+
+        <select
+
+          onchange="
+            updateCard(
+              ${wordIndex},
+              '${type}',
+              ${cardIndex},
+              'colour',
+              this.value
+            )
+          ">
+
+          ${renderColourOptions(
+            card.colour
+          )}
+
+        </select>
+
+
+        <button
+          class="danger"
+
+          onclick="
+            deleteCard(
+              ${wordIndex},
+              '${type}',
+              ${cardIndex}
+            )
+          ">
+
+          Delete
+
+        </button>
+
+      </div>
+
+    `
+    ).join('');
+  }
+
+
+  function toggleWord(
+    index
+  ) {
+
+    const detail =
+      document.getElementById(
+        `word-detail-${index}`
+      );
+
+
+    const arrow =
+      document.getElementById(
+        `arrow-${index}`
+      );
+
+
+    detail.classList.toggle(
+      'hidden'
+    );
+
+
+    arrow.textContent =
+      detail.classList.contains(
+        'hidden'
+      )
+      ? '▼'
+      : '▲';
+  }
+
+
+  function expandAllWords() {
+
+    games[
+      currentGameIndex
+    ]
+    .words
+    .forEach(
+      (word, index) => {
+
+        document.getElementById(
+          `word-detail-${index}`
+        )
+        ?.classList.remove(
+          'hidden'
+        );
+
+
+        const arrow =
+          document.getElementById(
+            `arrow-${index}`
+          );
+
+
+        if (
+          arrow
+        ) {
+
+          arrow.textContent =
+            '▲';
+        }
+      }
+    );
+  }
+
+
+  function collapseAllWords() {
+
+    games[
+      currentGameIndex
+    ]
+    .words
+    .forEach(
+      (word, index) => {
+
+        document.getElementById(
+          `word-detail-${index}`
+        )
+        ?.classList.add(
+          'hidden'
+        );
+
+
+        const arrow =
+          document.getElementById(
+            `arrow-${index}`
+          );
+
+
+        if (
+          arrow
+        ) {
+
+          arrow.textContent =
+            '▼';
+        }
+      }
+    );
+  }
+
+
+  function updateWordText(
+    index,
+    value
+  ) {
+
+    games[
+      currentGameIndex
+    ]
+    .words[
+      index
+    ]
+    .word =
+      value.trim()
+      ||
+      'Untitled word';
+
+
+    saveGames();
+
+
+    renderWordEditor(
+      index
+    );
+  }
+
+
+  function updateWordHint(
+    index,
+    value
+  ) {
+
+    games[
+      currentGameIndex
+    ]
+    .words[
+      index
+    ]
+    .hint =
+      value.trim();
+
+
+    saveGames();
+  }
+
+
+  function addSoundCard(
+    wordIndex,
+    type
+  ) {
+
+    const textInput =
+      document.getElementById(
+        `new-${type}-text-${wordIndex}`
+      );
+
+
+    const colourInput =
+      document.getElementById(
+        `new-${type}-colour-${wordIndex}`
+      );
+
+
+    const text =
+      textInput.value.trim();
+
+
+    if (
+      !text
+    ) {
+
+      alert(
+        'Please type something on the card first.'
+      );
+
+
+      return;
+    }
+
+
+    games[
+      currentGameIndex
+    ]
+    .words[
+      wordIndex
+    ][
+      type
+    ]
+    .push({
+
+      text:
+        text,
+
+      colour:
+        colourInput.value
+
+    });
+
+
+    saveGames();
+
+
+    renderWordEditor(
+      wordIndex
+    );
+  }
+
+
+  function updateCard(
+    wordIndex,
+    type,
+    cardIndex,
+    field,
+    value
+  ) {
+
+    games[
+      currentGameIndex
+    ]
+    .words[
+      wordIndex
+    ][
+      type
+    ][
+      cardIndex
+    ][
+      field
+    ] =
+      value;
+
+
+    saveGames();
+  }
+
+
+  function deleteCard(
+    wordIndex,
+    type,
+    cardIndex
+  ) {
+
+    games[
+      currentGameIndex
+    ]
+    .words[
+      wordIndex
+    ][
+      type
+    ]
+    .splice(
+      cardIndex,
+      1
+    );
+
+
+    saveGames();
+
+
+    renderWordEditor(
+      wordIndex
+    );
+  }
+
+
+  async function deleteWord(
+    index
+  ) {
+
+    if (
+      !confirm(
+        'Delete this word?'
+      )
+    ) {
+
+      return;
+    }
+
+
+    const word =
+      games[
+        currentGameIndex
+      ]
+      .words[
+        index
+      ];
+
+
+    try {
+
+      await deleteImageBlob(
+        word.id
+      );
+
+
+      await deleteAudioBlob(
+        word.id
+      );
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+    }
+
+
+    games[
+      currentGameIndex
+    ]
+    .words
+    .splice(
+      index,
+      1
+    );
+
+
+    saveGames();
+
+
+    renderWordEditor();
+  }
+
+
+
+  /* =====================================
+     PREVIEW
+  ===================================== */
+
+  function openPreview(
+    wordIndex
+  ) {
+
+    currentPreviewWordIndex =
+      wordIndex;
+
+
+    renderPreview();
+
+
+    showScreen(
+      'previewScreen'
+    );
+  }
+
+
+  async function renderPreview() {
+
+    const game =
+      games[
+        currentGameIndex
+      ];
+
+
+    const word =
+      game.words[
+        currentPreviewWordIndex
+      ];
+
+
+    await displayWordImage(
+      word.id,
+      'previewPicture'
+    );
+
+
+    const hasAudio =
+      await displayWordAudio(
+        word.id,
+        'previewAudio'
+      );
+
+
+    document.getElementById(
+      'previewAudioBox'
+    )
+    .classList.toggle(
+      'hidden',
+      !hasAudio
+    );
+
+
+    const hintBox =
+      document.getElementById(
+        'previewHint'
+      );
+
+
+    if (
+      word.hint &&
+      word.hint.trim()
+    ) {
+
+      hintBox.textContent =
+        word.hint;
+
+
+      hintBox.classList.remove(
+        'hidden'
+      );
+
+    } else {
+
+      hintBox.textContent =
+        '';
+
+
+      hintBox.classList.add(
+        'hidden'
+      );
+    }
+
+
+    previewSelected =
+      [];
+
+
+    document.getElementById(
+      'previewCounter'
+    )
+    .textContent =
+      `Word ${
+        currentPreviewWordIndex + 1
+      } of ${
+        game.words.length
+      }`;
+
+
+    document.getElementById(
+      'previewAnswer'
+    )
+    .innerHTML =
+      '';
+
+
+    document.getElementById(
+      'previewFeedback'
+    )
+    .textContent =
+      '';
+
+
+    const choices =
+      shuffleArray([
+
+        ...word.correct.map(
+          card => ({
+            ...card
+          })
+        ),
+
+        ...word.extra.map(
+          card => ({
+            ...card
+          })
+        )
+
+      ]);
+
+
+    const container =
+      document.getElementById(
+        'previewChoices'
+      );
+
+
+    container.innerHTML =
+      '';
+
+
+    choices.forEach(
+      card => {
+
+        const button =
+          document.createElement(
+            'button'
+          );
+
+
+        button.className =
+          `choice-card sound-card ${card.colour}`;
+
+
+        button.textContent =
+          card.text;
+
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            previewSelected.push({
+
+              text:
+                card.text,
+
+              colour:
+                card.colour,
+
+              sourceButton:
+                button
+
+            });
+
+
+            button.classList.add(
+              'used'
+            );
+
+
+            renderPreviewAnswer();
+          }
+        );
+
+
+        container.appendChild(
+          button
+        );
+      }
+    );
+  }
+
+
+  function renderPreviewAnswer() {
+
+    const container =
+      document.getElementById(
+        'previewAnswer'
+      );
+
+
+    container.innerHTML =
+      '';
+
+
+    previewSelected.forEach(
+      (card, index) => {
+
+        const button =
+          document.createElement(
+            'button'
+          );
+
+
+        button.className =
+          `sound-card ${card.colour}`;
+
+
+        button.textContent =
+          card.text;
+
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            card.sourceButton
+              ?.classList.remove(
                 'used'
               );
 
 
-              renderPreviewAnswer();
-            }
-          );
-
-
-          container.appendChild(
-            button
-          );
-        }
-      );
-    }
-
-
-    function renderPreviewAnswer() {
-
-      const container =
-        document.getElementById(
-          'previewAnswer'
-        );
-
-
-      container.innerHTML =
-        '';
-
-
-      previewSelected.forEach(
-        (card, index) => {
-
-          const button =
-            document.createElement(
-              'button'
+            previewSelected.splice(
+              index,
+              1
             );
 
 
-          button.className =
-            `sound-card ${card.colour}`;
-
-
-          button.textContent =
-            card.text;
-
-
-          button.addEventListener(
-            'click',
-            () => {
-
-              card.sourceButton
-                ?.classList.remove(
-                  'used'
-                );
-
-
-              previewSelected.splice(
-                index,
-                1
-              );
-
-
-              renderPreviewAnswer();
-            }
-          );
-
-
-          container.appendChild(
-            button
-          );
-        }
-      );
-    }
-
-
-    function checkPreviewAnswer() {
-
-      const word =
-        games[
-          currentGameIndex
-        ]
-        .words[
-          currentPreviewWordIndex
-        ];
-
-
-      const expected =
-        word.correct
-          .map(
-            card =>
-              card.text
-          )
-          .join('|');
-
-
-      const chosen =
-        previewSelected
-          .map(
-            card =>
-              card.text
-          )
-          .join('|');
-
-
-      const feedback =
-        document.getElementById(
-          'previewFeedback'
+            renderPreviewAnswer();
+          }
         );
 
 
-      if (
-        chosen ===
-        expected
-      ) {
-
-        feedback.textContent =
-          '⭐ You know your words! Great spelling!';
-
-      } else {
-
-        feedback.textContent =
-          '⭐ Keep going! You’re really listening to the sounds in your word.';
+        container.appendChild(
+          button
+        );
       }
-    }
+    );
+  }
 
 
-    function previousPreviewWord() {
+  function checkPreviewAnswer() {
 
-      if (
-        currentPreviewWordIndex >
-        0
-      ) {
-
-        currentPreviewWordIndex--;
-
-
-        renderPreview();
-      }
-    }
-
-
-    function nextPreviewWord() {
-
-      const game =
-        games[
-          currentGameIndex
-        ];
-
-
-      if (
-        currentPreviewWordIndex <
-        game.words.length -
-        1
-      ) {
-
-        currentPreviewWordIndex++;
-
-
-        renderPreview();
-      }
-    }
-
-
-    function returnToEditor() {
-
-      renderWordEditor(
+    const word =
+      games[
+        currentGameIndex
+      ]
+      .words[
         currentPreviewWordIndex
+      ];
+
+
+    const expected =
+      word.correct
+        .map(
+          card =>
+            card.text
+        )
+        .join('|');
+
+
+    const chosen =
+      previewSelected
+        .map(
+          card =>
+            card.text
+        )
+        .join('|');
+
+
+    const feedback =
+      document.getElementById(
+        'previewFeedback'
       );
 
 
-      showScreen(
-        'editorScreen'
-      );
+    if (
+      chosen ===
+      expected
+    ) {
+
+      feedback.textContent =
+        '⭐ You know your words! Great spelling!';
+
+    } else {
+
+      feedback.textContent =
+        '⭐ Keep going! You’re really listening to the sounds in your word.';
     }
+  }
 
-  </script>
+
+  function previousPreviewWord() {
+
+    if (
+      currentPreviewWordIndex >
+      0
+    ) {
+
+      currentPreviewWordIndex--;
+
+
+      renderPreview();
+    }
+  }
+
+
+  function nextPreviewWord() {
+
+    const game =
+      games[
+        currentGameIndex
+      ];
+
+
+    if (
+      currentPreviewWordIndex <
+      game.words.length -
+      1
+    ) {
+
+      currentPreviewWordIndex++;
+
+
+      renderPreview();
+    }
+  }
+
+
+  function returnToEditor() {
+
+    renderWordEditor(
+      currentPreviewWordIndex
+    );
+
+
+    showScreen(
+      'editorScreen'
+    );
+  }
+
+</script>
 
 </body>
-
 </html>
