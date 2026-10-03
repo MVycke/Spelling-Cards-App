@@ -118,16 +118,24 @@
       box-shadow: 0 3px 10px rgba(0,0,0,0.08);
     }
 
-    .row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
 
-    .space-between {
-      justify-content: space-between;
-    }
+.editor-actions {
+  align-items: stretch;
+}
+
+.editor-actions button {
+  margin-bottom: 0;
+}
+
+.space-between {
+  justify-content: space-between;
+}
 
     .game-row {
       display: flex;
@@ -401,16 +409,12 @@
           <input id="gameNameInput" type="text" style="width:100%">
         </div>
 
-        <div class="row">
+<div class="row editor-actions">
   <button class="save-button" onclick="saveGameName()">Save Game Name</button>
   <button class="secondary" onclick="expandAllWords()">Expand All</button>
   <button class="secondary" onclick="collapseAllWords()">Collapse All</button>
-</div>
-
-<div style="margin-top:14px;">
   <button class="create-new" onclick="addWord()">+ Add Word</button>
 </div>
-
         <p class="small" id="wordCountText"></p>
       </div>
 
