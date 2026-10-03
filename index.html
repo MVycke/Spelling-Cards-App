@@ -395,11 +395,20 @@
       gap: 18px;
       flex-wrap: wrap;
       align-items: center;
+      border: 2px dashed transparent;
+      border-radius: 16px;
+      padding: 10px;
+      transition: 0.2s;
+    }
+
+    .picture-editor.dragging {
+      border-color: #78c7f2;
+      background: #eef8ff;
     }
 
     .picture-preview-box {
-      width: 220px;
-      min-height: 150px;
+      width: 240px;
+      min-height: 170px;
       border: 2px dashed #b9c6d3;
       border-radius: 14px;
       display: flex;
@@ -407,6 +416,13 @@
       justify-content: center;
       overflow: hidden;
       background: #f9fbfd;
+      cursor: pointer;
+      text-align: center;
+      padding: 12px;
+    }
+
+    .picture-preview-box:hover {
+      background: #eef8ff;
     }
 
     .picture-preview-box img {
@@ -464,8 +480,6 @@
 
 <body>
 
-  <!-- HOME -->
-
   <main id="homeScreen"
         class="screen home">
 
@@ -506,8 +520,6 @@
   </main>
 
 
-  <!-- PLAY GAME LIST -->
-
   <section id="playScreen"
            class="screen hidden">
 
@@ -526,8 +538,6 @@
 
   </section>
 
-
-  <!-- CHILD PLAY -->
 
   <section id="childPlayScreen"
            class="screen hidden">
@@ -586,8 +596,6 @@
   </section>
 
 
-  <!-- CREATE / EDIT LIST -->
-
   <section id="createScreen"
            class="screen hidden">
 
@@ -641,8 +649,6 @@
 
   </section>
 
-
-  <!-- GAME EDITOR -->
 
   <section id="editorScreen"
            class="screen hidden">
@@ -707,8 +713,6 @@
 
   </section>
 
-
-  <!-- PREVIEW -->
 
   <section id="previewScreen"
            class="screen hidden">
@@ -782,8 +786,6 @@
   </section>
 
 
-  <!-- RESULTS -->
-
   <section id="resultsScreen"
            class="screen hidden">
 
@@ -802,8 +804,6 @@
 
   </section>
 
-
-  <!-- HELP -->
 
   <section id="helpScreen"
            class="screen hidden">
@@ -913,10 +913,6 @@
 
   <script>
 
-    /* =========================
-       HELPERS
-    ========================= */
-
     function makeId(prefix) {
 
       return (
@@ -947,7 +943,6 @@
       return String(
         text ?? ''
       )
-
         .replaceAll('&', '&amp;')
         .replaceAll('<', '&lt;')
         .replaceAll('>', '&gt;')
@@ -969,11 +964,8 @@
 
 
       for (
-        let i =
-          copy.length - 1;
-
+        let i = copy.length - 1;
         i > 0;
-
         i--
       ) {
 
@@ -1000,10 +992,6 @@
     }
 
 
-
-    /* =========================
-       IMAGE DATABASE
-    ========================= */
 
     const MEDIA_DB_NAME =
       'SpellingCardsMedia';
@@ -1088,16 +1076,14 @@
             );
 
 
-          const store =
-            transaction.objectStore(
+          transaction
+            .objectStore(
               IMAGE_STORE
+            )
+            .put(
+              blob,
+              wordId
             );
-
-
-          store.put(
-            blob,
-            wordId
-          );
 
 
           transaction.oncomplete =
@@ -1141,16 +1127,14 @@
             );
 
 
-          const store =
-            transaction.objectStore(
-              IMAGE_STORE
-            );
-
-
           const request =
-            store.get(
-              wordId
-            );
+            transaction
+              .objectStore(
+                IMAGE_STORE
+              )
+              .get(
+                wordId
+              );
 
 
           request.onsuccess =
@@ -1197,12 +1181,13 @@
             );
 
 
-          transaction.objectStore(
-            IMAGE_STORE
-          )
-          .delete(
-            wordId
-          );
+          transaction
+            .objectStore(
+              IMAGE_STORE
+            )
+            .delete(
+              wordId
+            );
 
 
           transaction.oncomplete =
@@ -1228,10 +1213,6 @@
     }
 
 
-
-    /* =========================
-       IMAGE RESIZING
-    ========================= */
 
     function resizeImageFile(file) {
 
@@ -1324,7 +1305,9 @@
                         blob
                       ) {
 
-                        resolve(blob);
+                        resolve(
+                          blob
+                        );
 
                       } else {
 
@@ -1375,10 +1358,6 @@
     }
 
 
-
-    /* =========================
-       DISPLAY IMAGE
-    ========================= */
 
     const objectUrls =
       new Map();
@@ -1496,10 +1475,6 @@
 
 
 
-    /* =========================
-       COLOURS
-    ========================= */
-
     const colourOptions = [
       'green',
       'blue',
@@ -1512,7 +1487,7 @@
     const defaultColourMeanings = {
 
       green:
-        'First letter of the word or each syllable',
+        'First letter of the word and each syllable',
 
       blue:
         'Other consonant',
@@ -1683,10 +1658,6 @@
     }
 
 
-
-    /* =========================
-       SAVED GAMES
-    ========================= */
 
     let games =
       JSON.parse(
@@ -1969,10 +1940,6 @@
 
 
 
-    /* =========================
-       APP STATE
-    ========================= */
-
     let currentGameIndex =
       0;
 
@@ -1998,10 +1965,6 @@
       [];
 
 
-
-    /* =========================
-       SCREEN NAVIGATION
-    ========================= */
 
     function showScreen(
       screenId
@@ -2035,10 +1998,6 @@
     }
 
 
-
-    /* =========================
-       HELP
-    ========================= */
 
     function openHelp() {
 
@@ -2122,10 +2081,6 @@
 
 
 
-    /* =========================
-       PLAY LIST
-    ========================= */
-
     function openPlayList() {
 
       renderPlayGameList();
@@ -2193,10 +2148,6 @@
     }
 
 
-
-    /* =========================
-       CHILD PLAY
-    ========================= */
 
     function startChildGame(
       gameIndex
@@ -2782,10 +2733,6 @@
 
 
 
-    /* =========================
-       RESULTS
-    ========================= */
-
     function saveCurrentResults() {
 
       const resultData = {
@@ -2865,12 +2812,10 @@
 
       const known =
         saved.results
-
           .filter(
             item =>
               !item.needsPractice
           )
-
           .map(
             item =>
               item.word
@@ -2879,12 +2824,10 @@
 
       const practice =
         saved.results
-
           .filter(
             item =>
               item.needsPractice
           )
-
           .map(
             item =>
               item.word
@@ -3031,10 +2974,6 @@
     }
 
 
-
-    /* =========================
-       CREATE / EDIT LIST
-    ========================= */
 
     function openCreateList() {
 
@@ -3212,10 +3151,6 @@
     }
 
 
-
-    /* =========================
-       GAME EDITOR
-    ========================= */
 
     function openEditor(
       index
@@ -3471,15 +3406,54 @@
                   Picture (optional)
                 </label>
 
-                <div class="picture-editor">
+                <div
+                  class="picture-editor"
+                  id="picture-drop-${word.id}"
+                  tabindex="0"
+                  ondragover="
+                    handlePictureDragOver(
+                      event
+                    )
+                  "
+                  ondragleave="
+                    handlePictureDragLeave(
+                      event
+                    )
+                  "
+                  ondrop="
+                    handlePictureDrop(
+                      event,
+                      '${word.id}',
+                      ${wordIndex}
+                    )
+                  "
+                  onpaste="
+                    handlePicturePaste(
+                      event,
+                      '${word.id}',
+                      ${wordIndex}
+                    )
+                  ">
 
-                  <div class="picture-preview-box">
+
+                  <div
+                    class="picture-preview-box"
+                    onclick="
+                      document.getElementById(
+                        'picture-file-${word.id}'
+                      ).click()
+                    ">
 
                     <span
                       id="editor-picture-empty-${word.id}"
                       class="small">
-                      No picture added
+
+                      Drag an image here,<br>
+                      click to choose a file,<br>
+                      or press Ctrl+V to paste
+
                     </span>
+
 
                     <img
                       id="editor-picture-${word.id}"
@@ -3494,6 +3468,7 @@
                   <div class="picture-controls">
 
                     <input
+                      id="picture-file-${word.id}"
                       class="file-input"
                       type="file"
                       accept="image/*"
@@ -3504,6 +3479,7 @@
                           ${wordIndex}
                         )
                       ">
+
 
                     <button
                       class="danger"
@@ -3516,8 +3492,13 @@
                       Remove Picture
                     </button>
 
+
                     <div class="small">
-                      The app will automatically resize large pictures before saving them.
+
+                      You can choose,
+                      drag and drop,
+                      or paste an image.
+
                     </div>
 
                   </div>
@@ -3655,6 +3636,7 @@
     }
 
 
+
     async function loadEditorPictures() {
 
       const game =
@@ -3704,6 +3686,128 @@
     }
 
 
+
+    function handlePictureDragOver(
+      event
+    ) {
+
+      event.preventDefault();
+
+
+      event.currentTarget
+        .classList.add(
+          'dragging'
+        );
+    }
+
+
+    function handlePictureDragLeave(
+      event
+    ) {
+
+      event.currentTarget
+        .classList.remove(
+          'dragging'
+        );
+    }
+
+
+    async function handlePictureDrop(
+      event,
+      wordId,
+      wordIndex
+    ) {
+
+      event.preventDefault();
+
+
+      event.currentTarget
+        .classList.remove(
+          'dragging'
+        );
+
+
+      const files =
+        event.dataTransfer.files;
+
+
+      if (
+        !files ||
+        files.length ===
+        0
+      ) {
+
+        return;
+      }
+
+
+      const file =
+        files[0];
+
+
+      await handlePictureUpload(
+        wordId,
+        file,
+        wordIndex
+      );
+    }
+
+
+    async function handlePicturePaste(
+      event,
+      wordId,
+      wordIndex
+    ) {
+
+      const items =
+        event.clipboardData?.items;
+
+
+      if (
+        !items
+      ) {
+
+        return;
+      }
+
+
+      for (
+        const item of
+        items
+      ) {
+
+        if (
+          item.type &&
+          item.type.startsWith(
+            'image/'
+          )
+        ) {
+
+          event.preventDefault();
+
+
+          const file =
+            item.getAsFile();
+
+
+          if (
+            file
+          ) {
+
+            await handlePictureUpload(
+              wordId,
+              file,
+              wordIndex
+            );
+          }
+
+
+          return;
+        }
+      }
+    }
+
+
     async function handlePictureUpload(
       wordId,
       file,
@@ -3719,13 +3823,14 @@
 
 
       if (
+        !file.type ||
         !file.type.startsWith(
           'image/'
         )
       ) {
 
         alert(
-          'Please choose an image file.'
+          'Please choose, drop or paste an image file.'
         );
 
 
@@ -3798,6 +3903,7 @@
         );
       }
     }
+
 
 
     function renderEditableCards(
@@ -4195,10 +4301,6 @@
     }
 
 
-
-    /* =========================
-       PREVIEW
-    ========================= */
 
     function openPreview(
       wordIndex
