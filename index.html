@@ -7,6 +7,10 @@
   <title>Spelling Cards</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
@@ -14,20 +18,31 @@
       color: #183153;
     }
 
-    .home {
+    .screen {
       min-height: 100vh;
+      padding: 30px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .home {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 30px;
-      box-sizing: border-box;
     }
 
     h1 {
       font-size: 56px;
       margin: 0 0 10px;
       text-align: center;
+    }
+
+    h2 {
+      font-size: 36px;
+      margin-top: 0;
     }
 
     .subtitle {
@@ -44,10 +59,10 @@
     }
 
     button {
-      min-height: 75px;
+      min-height: 60px;
       border: none;
       border-radius: 18px;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: bold;
       cursor: pointer;
       padding: 15px 25px;
@@ -69,8 +84,9 @@
       background: #78c7f2;
     }
 
-    button:hover {
-      filter: brightness(0.96);
+    .back {
+      background: #dfe8f2;
+      margin-bottom: 25px;
     }
 
     .note {
@@ -78,12 +94,95 @@
       font-size: 18px;
       text-align: center;
     }
+
+    .content {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 18px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    .game-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .game-row button {
+      background: #61c978;
+      min-width: 140px;
+    }
+
+    .edit-row button {
+      background: #ffd65a;
+      min-width: 140px;
+    }
+
+    .create-new {
+      background: #78c7f2;
+      margin-bottom: 25px;
+    }
+
+    .help-tabs {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .help-tabs button {
+      flex: 1;
+      min-width: 220px;
+      background: #dfe8f2;
+    }
+
+    .help-tabs button.active {
+      background: #78c7f2;
+    }
+
+    .help-step {
+      font-size: 20px;
+      line-height: 1.5;
+      margin: 18px 0;
+    }
+
+    .placeholder {
+      color: #5f7084;
+      font-size: 20px;
+    }
+
+    @media (max-width: 700px) {
+      h1 {
+        font-size: 40px;
+      }
+
+      h2 {
+        font-size: 30px;
+      }
+
+      .screen {
+        padding: 20px;
+      }
+
+      button {
+        font-size: 20px;
+      }
+    }
   </style>
 </head>
 
 <body>
 
-  <main class="home">
+  <!-- HOME SCREEN -->
+  <main id="homeScreen" class="screen home">
 
     <h1>🔤 SPELLING CARDS</h1>
 
@@ -93,19 +192,19 @@
 
     <div class="menu">
 
-      <button class="play">
+      <button class="play" onclick="showScreen('playScreen')">
         ▶ Play a Game
       </button>
 
-      <button class="create">
+      <button class="create" onclick="showScreen('createScreen')">
         ✏️ Create / Edit
       </button>
 
-      <button class="results">
+      <button class="results" onclick="showScreen('resultsScreen')">
         📊 Results
       </button>
 
-      <button class="help">
+      <button class="help" onclick="openHelp()">
         📖 How to Setup &amp; Play
       </button>
 
@@ -116,6 +215,218 @@
     </div>
 
   </main>
+
+
+  <!-- PLAY SCREEN -->
+  <section id="playScreen" class="screen hidden">
+    <div class="content">
+
+      <button class="back" onclick="showScreen('homeScreen')">
+        ← Home
+      </button>
+
+      <h2>My Spelling Games</h2>
+
+      <div class="card game-row">
+        <div>
+          <strong>Week 1 – ar sound</strong>
+          <p>5 example words</p>
+        </div>
+
+        <button onclick="alert('The spelling game itself is the next part we will build.')">
+          Play
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- CREATE / EDIT SCREEN -->
+  <section id="createScreen" class="screen hidden">
+    <div class="content">
+
+      <button class="back" onclick="showScreen('homeScreen')">
+        ← Home
+      </button>
+
+      <h2>Create / Edit</h2>
+
+      <button class="create-new" onclick="alert('Creating a new game is coming in the next build.')">
+        + Create New Game
+      </button>
+
+      <div class="card game-row edit-row">
+        <div>
+          <strong>Week 1 – ar sound</strong>
+          <p>5 / 20 words</p>
+        </div>
+
+        <button onclick="alert('The expandable word editor is the next feature we will build.')">
+          Edit
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- RESULTS SCREEN -->
+  <section id="resultsScreen" class="screen hidden">
+    <div class="content">
+
+      <button class="back" onclick="showScreen('homeScreen')">
+        ← Home
+      </button>
+
+      <h2>Results</h2>
+
+      <div class="card">
+        <p class="placeholder">
+          Your spelling results will appear here after games have been played.
+        </p>
+
+        <p>
+          <strong>Words you knew well</strong>
+        </p>
+
+        <p>
+          <strong>Words that need extra practice</strong>
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- HELP SCREEN -->
+  <section id="helpScreen" class="screen hidden">
+    <div class="content">
+
+      <button class="back" onclick="showScreen('homeScreen')">
+        ← Home
+      </button>
+
+      <h2>How to Setup &amp; Play</h2>
+
+      <div class="help-tabs">
+        <button id="childTab" class="active" onclick="showChildHelp()">
+          For Children – Play
+        </button>
+
+        <button id="adultTab" onclick="showAdultHelp()">
+          For Adults – Setup
+        </button>
+      </div>
+
+      <div id="childHelp" class="card">
+
+        <div class="help-step">
+          🔊 <strong>1. Listen</strong><br>
+          Press the play button to hear your word.
+        </div>
+
+        <div class="help-step">
+          👀 <strong>2. Look</strong><br>
+          Look at the picture if there is one.
+        </div>
+
+        <div class="help-step">
+          🔤 <strong>3. Build</strong><br>
+          Choose the sound cards to make your word.
+        </div>
+
+        <div class="help-step">
+          ✅ <strong>4. Check</strong><br>
+          Press Check when you are finished.
+        </div>
+
+        <div class="help-step">
+          ⭐ <strong>5. Keep going</strong><br>
+          Have another try if you need to.
+        </div>
+
+      </div>
+
+      <div id="adultHelp" class="card hidden">
+
+        <div class="help-step">
+          <strong>1. Create a game</strong><br>
+          Give your spelling game a name.
+        </div>
+
+        <div class="help-step">
+          <strong>2. Add words</strong><br>
+          Add up to 20 words.
+        </div>
+
+        <div class="help-step">
+          <strong>3. Build the sound cards</strong><br>
+          Break each word into the sound cards you want the child to use.
+        </div>
+
+        <div class="help-step">
+          <strong>4. Choose colours</strong><br>
+          Each correct or extra card can use the colour you choose.
+        </div>
+
+        <div class="help-step">
+          <strong>5. Add optional extras</strong><br>
+          Add extra cards, a picture and a recording if needed.
+        </div>
+
+        <div class="help-step">
+          <strong>6. Preview</strong><br>
+          Test the word exactly as the child will see it.
+        </div>
+
+        <div class="help-step">
+          <strong>7. Save and play</strong><br>
+          Once you are happy with the game, save it and it is ready to use.
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <script>
+    function showScreen(screenId) {
+      const screens = document.querySelectorAll('.screen');
+
+      screens.forEach(function(screen) {
+        screen.classList.add('hidden');
+      });
+
+      document.getElementById(screenId).classList.remove('hidden');
+      window.scrollTo(0, 0);
+    }
+
+
+    function openHelp() {
+      showScreen('helpScreen');
+      showChildHelp();
+    }
+
+
+    function showChildHelp() {
+      document.getElementById('childHelp').classList.remove('hidden');
+      document.getElementById('adultHelp').classList.add('hidden');
+
+      document.getElementById('childTab').classList.add('active');
+      document.getElementById('adultTab').classList.remove('active');
+    }
+
+
+    function showAdultHelp() {
+      document.getElementById('adultHelp').classList.remove('hidden');
+      document.getElementById('childHelp').classList.add('hidden');
+
+      document.getElementById('adultTab').classList.add('active');
+      document.getElementById('childTab').classList.remove('active');
+    }
+  </script>
 
 </body>
 </html>
