@@ -2622,10 +2622,33 @@
   }
 
 
-  function renderColourOptions(
-    selected = 'green'
-  ) {
+function renderColourOptions(
+  selected = 'green'
+) {
 
+  return colourOptions.map(
+    colour => `
+
+      <option
+        value="${colour}"
+        ${
+          colour === selected
+          ?
+          'selected'
+          :
+          ''
+        }>
+
+        ${capitalise(colour)}
+        – ${escapeHtml(
+          colourMeanings[colour] || ''
+        )}
+
+      </option>
+
+    `
+  ).join('');
+}
     return colourOptions.map(
       colour => `
 
