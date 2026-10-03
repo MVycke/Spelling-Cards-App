@@ -390,6 +390,51 @@
       line-height: 1.5;
     }
 
+    .picture-editor {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .picture-preview-box {
+      width: 220px;
+      min-height: 150px;
+      border: 2px dashed #b9c6d3;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #f9fbfd;
+    }
+
+    .picture-preview-box img {
+      width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .word-picture {
+      max-width: 330px;
+      max-height: 250px;
+      object-fit: contain;
+      display: block;
+      margin: 18px auto;
+      border-radius: 14px;
+    }
+
+    .picture-controls {
+      display: grid;
+      gap: 10px;
+      min-width: 250px;
+    }
+
+    .file-input {
+      max-width: 100%;
+    }
+
     @media (max-width: 750px) {
       h1 {
         font-size: 40px;
@@ -501,6 +546,10 @@
 
         <div id="childCounter"
              class="game-counter"></div>
+
+        <img id="childPicture"
+             class="word-picture hidden"
+             alt="Picture clue">
 
         <div id="childHint"
              class="word-hint hidden"></div>
@@ -689,6 +738,10 @@
 
         <h2>Preview</h2>
 
+        <img id="previewPicture"
+             class="word-picture hidden"
+             alt="Picture clue">
+
         <div id="previewHint"
              class="word-hint hidden"></div>
 
@@ -826,8 +879,8 @@
         </div>
 
         <div class="help-step">
-          <strong>3. Add a meaning or clue</strong><br>
-          Add an optional meaning, clue or sentence for each word.
+          <strong>3. Add optional supports</strong><br>
+          Add a meaning, clue or picture to a word if helpful.
         </div>
 
         <div class="help-step">
@@ -861,6 +914,589 @@
   <script>
 
     /* =========================
+       HELPERS
+    ========================= */
+
+    function makeId(prefix) {
+
+      return (
+        prefix +
+        '-' +
+        Date.now() +
+        '-' +
+        Math.random()
+          .toString(36)
+          .slice(2, 10)
+      );
+    }
+
+
+    function capitalise(text) {
+
+      return (
+        text.charAt(0)
+          .toUpperCase()
+        +
+        text.slice(1)
+      );
+    }
+
+
+    function escapeHtml(text) {
+
+      return String(
+        text ?? ''
+      )
+
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+
+    function escapeAttribute(text) {
+
+      return escapeHtml(text);
+    }
+
+
+    function shuffleArray(array) {
+
+      const copy =
+        [...array];
+
+
+      for (
+        let i =
+          copy.length - 1;
+
+        i > 0;
+
+        i--
+      ) {
+
+        const j =
+          Math.floor(
+            Math.random() *
+            (i + 1)
+          );
+
+
+        [
+          copy[i],
+          copy[j]
+        ]
+        =
+        [
+          copy[j],
+          copy[i]
+        ];
+      }
+
+
+      return copy;
+    }
+
+
+
+    /* =========================
+       IMAGE DATABASE
+    ========================= */
+
+    const MEDIA_DB_NAME =
+      'SpellingCardsMedia';
+
+    const MEDIA_DB_VERSION =
+      1;
+
+    const IMAGE_STORE =
+      'images';
+
+
+    function openMediaDB() {
+
+      return new Promise(
+        (resolve, reject) => {
+
+          const request =
+            indexedDB.open(
+              MEDIA_DB_NAME,
+              MEDIA_DB_VERSION
+            );
+
+
+          request.onupgradeneeded =
+            function(event) {
+
+              const db =
+                event.target.result;
+
+
+              if (
+                !db.objectStoreNames
+                  .contains(
+                    IMAGE_STORE
+                  )
+              ) {
+
+                db.createObjectStore(
+                  IMAGE_STORE
+                );
+              }
+            };
+
+
+          request.onsuccess =
+            function() {
+
+              resolve(
+                request.result
+              );
+            };
+
+
+          request.onerror =
+            function() {
+
+              reject(
+                request.error
+              );
+            };
+        }
+      );
+    }
+
+
+    async function saveImageBlob(
+      wordId,
+      blob
+    ) {
+
+      const db =
+        await openMediaDB();
+
+
+      return new Promise(
+        (resolve, reject) => {
+
+          const transaction =
+            db.transaction(
+              IMAGE_STORE,
+              'readwrite'
+            );
+
+
+          const store =
+            transaction.objectStore(
+              IMAGE_STORE
+            );
+
+
+          store.put(
+            blob,
+            wordId
+          );
+
+
+          transaction.oncomplete =
+            function() {
+
+              db.close();
+
+              resolve();
+            };
+
+
+          transaction.onerror =
+            function() {
+
+              db.close();
+
+              reject(
+                transaction.error
+              );
+            };
+        }
+      );
+    }
+
+
+    async function getImageBlob(
+      wordId
+    ) {
+
+      const db =
+        await openMediaDB();
+
+
+      return new Promise(
+        (resolve, reject) => {
+
+          const transaction =
+            db.transaction(
+              IMAGE_STORE,
+              'readonly'
+            );
+
+
+          const store =
+            transaction.objectStore(
+              IMAGE_STORE
+            );
+
+
+          const request =
+            store.get(
+              wordId
+            );
+
+
+          request.onsuccess =
+            function() {
+
+              db.close();
+
+              resolve(
+                request.result ||
+                null
+              );
+            };
+
+
+          request.onerror =
+            function() {
+
+              db.close();
+
+              reject(
+                request.error
+              );
+            };
+        }
+      );
+    }
+
+
+    async function deleteImageBlob(
+      wordId
+    ) {
+
+      const db =
+        await openMediaDB();
+
+
+      return new Promise(
+        (resolve, reject) => {
+
+          const transaction =
+            db.transaction(
+              IMAGE_STORE,
+              'readwrite'
+            );
+
+
+          transaction.objectStore(
+            IMAGE_STORE
+          )
+          .delete(
+            wordId
+          );
+
+
+          transaction.oncomplete =
+            function() {
+
+              db.close();
+
+              resolve();
+            };
+
+
+          transaction.onerror =
+            function() {
+
+              db.close();
+
+              reject(
+                transaction.error
+              );
+            };
+        }
+      );
+    }
+
+
+
+    /* =========================
+       IMAGE RESIZING
+    ========================= */
+
+    function resizeImageFile(file) {
+
+      return new Promise(
+        (resolve, reject) => {
+
+          const reader =
+            new FileReader();
+
+
+          reader.onload =
+            function() {
+
+              const image =
+                new Image();
+
+
+              image.onload =
+                function() {
+
+                  const maxSize =
+                    1200;
+
+
+                  let width =
+                    image.width;
+
+                  let height =
+                    image.height;
+
+
+                  if (
+                    width > maxSize ||
+                    height > maxSize
+                  ) {
+
+                    const scale =
+                      Math.min(
+                        maxSize / width,
+                        maxSize / height
+                      );
+
+
+                    width =
+                      Math.round(
+                        width * scale
+                      );
+
+
+                    height =
+                      Math.round(
+                        height * scale
+                      );
+                  }
+
+
+                  const canvas =
+                    document.createElement(
+                      'canvas'
+                    );
+
+
+                  canvas.width =
+                    width;
+
+
+                  canvas.height =
+                    height;
+
+
+                  const context =
+                    canvas.getContext(
+                      '2d'
+                    );
+
+
+                  context.drawImage(
+                    image,
+                    0,
+                    0,
+                    width,
+                    height
+                  );
+
+
+                  canvas.toBlob(
+                    function(blob) {
+
+                      if (
+                        blob
+                      ) {
+
+                        resolve(blob);
+
+                      } else {
+
+                        reject(
+                          new Error(
+                            'Could not prepare image.'
+                          )
+                        );
+                      }
+                    },
+
+                    'image/jpeg',
+                    0.82
+                  );
+                };
+
+
+              image.onerror =
+                function() {
+
+                  reject(
+                    new Error(
+                      'The picture could not be opened.'
+                    )
+                  );
+                };
+
+
+              image.src =
+                reader.result;
+            };
+
+
+          reader.onerror =
+            function() {
+
+              reject(
+                reader.error
+              );
+            };
+
+
+          reader.readAsDataURL(
+            file
+          );
+        }
+      );
+    }
+
+
+
+    /* =========================
+       DISPLAY IMAGE
+    ========================= */
+
+    const objectUrls =
+      new Map();
+
+
+    function clearImageElement(
+      element
+    ) {
+
+      const oldUrl =
+        objectUrls.get(
+          element.id
+        );
+
+
+      if (
+        oldUrl
+      ) {
+
+        URL.revokeObjectURL(
+          oldUrl
+        );
+
+
+        objectUrls.delete(
+          element.id
+        );
+      }
+
+
+      element.removeAttribute(
+        'src'
+      );
+
+
+      element.classList.add(
+        'hidden'
+      );
+    }
+
+
+    async function displayWordImage(
+      wordId,
+      elementId
+    ) {
+
+      const element =
+        document.getElementById(
+          elementId
+        );
+
+
+      if (
+        !element
+      ) {
+
+        return false;
+      }
+
+
+      clearImageElement(
+        element
+      );
+
+
+      try {
+
+        const blob =
+          await getImageBlob(
+            wordId
+          );
+
+
+        if (
+          !blob
+        ) {
+
+          return false;
+        }
+
+
+        const url =
+          URL.createObjectURL(
+            blob
+          );
+
+
+        objectUrls.set(
+          element.id,
+          url
+        );
+
+
+        element.src =
+          url;
+
+
+        element.classList.remove(
+          'hidden'
+        );
+
+
+        return true;
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+
+        return false;
+      }
+    }
+
+
+
+    /* =========================
        COLOURS
     ========================= */
 
@@ -876,7 +1512,7 @@
     const defaultColourMeanings = {
 
       green:
-        'First letter of a syllable',
+        'First letter of the word or each syllable',
 
       blue:
         'Other consonant',
@@ -901,11 +1537,14 @@
       );
 
 
-    if (!colourMeanings) {
+    if (
+      !colourMeanings
+    ) {
 
       colourMeanings = {
         ...defaultColourMeanings
       };
+
 
       saveColourMeaningsToStorage();
     }
@@ -989,7 +1628,9 @@
             );
 
 
-          if (input) {
+          if (
+            input
+          ) {
 
             colourMeanings[colour] =
               input.value.trim();
@@ -1009,16 +1650,11 @@
       document.getElementById(
         'colourMeaningPanel'
       )
-      .classList
-      .add('hidden');
+      .classList.add(
+        'hidden'
+      );
     }
 
-
-    /*
-      IMPORTANT:
-      This is the corrected colour dropdown function.
-      There is only ONE copy of it.
-    */
 
     function renderColourOptions(
       selected = 'green'
@@ -1060,17 +1696,25 @@
       );
 
 
-    if (!games) {
+    if (
+      !games
+    ) {
 
       games = [
 
         {
+          id:
+            makeId('game'),
+
           name:
             'Week 1 – ar sound',
 
           words: [
 
             {
+              id:
+                makeId('word'),
+
               word:
                 'car',
 
@@ -1112,6 +1756,9 @@
 
 
             {
+              id:
+                makeId('word'),
+
               word:
                 'farm',
 
@@ -1169,6 +1816,9 @@
 
 
             {
+              id:
+                makeId('word'),
+
               word:
                 'start',
 
@@ -1234,6 +1884,76 @@
     }
 
 
+
+    function ensureIds() {
+
+      let changed =
+        false;
+
+
+      games.forEach(
+        game => {
+
+          if (
+            !game.id
+          ) {
+
+            game.id =
+              makeId(
+                'game'
+              );
+
+
+            changed =
+              true;
+          }
+
+
+          game.words.forEach(
+            word => {
+
+              if (
+                !word.id
+              ) {
+
+                word.id =
+                  makeId(
+                    'word'
+                  );
+
+
+                changed =
+                  true;
+              }
+
+
+              if (
+                typeof word.hint !==
+                'string'
+              ) {
+
+                word.hint =
+                  '';
+
+
+                changed =
+                  true;
+              }
+            }
+          );
+        }
+      );
+
+
+      if (
+        changed
+      ) {
+
+        saveGames();
+      }
+    }
+
+
     function saveGames() {
 
       localStorage.setItem(
@@ -1245,27 +1965,37 @@
     }
 
 
+    ensureIds();
+
+
 
     /* =========================
        APP STATE
     ========================= */
 
-    let currentGameIndex = 0;
+    let currentGameIndex =
+      0;
 
-    let currentPreviewWordIndex = 0;
+    let currentPreviewWordIndex =
+      0;
 
-    let previewSelected = [];
+    let previewSelected =
+      [];
 
+    let childWordIndex =
+      0;
 
-    let childWordIndex = 0;
+    let childSelected =
+      [];
 
-    let childSelected = [];
+    let childAttempts =
+      0;
 
-    let childAttempts = 0;
+    let childWordFinished =
+      false;
 
-    let childWordFinished = false;
-
-    let currentGameResults = [];
+    let currentGameResults =
+      [];
 
 
 
@@ -1293,8 +2023,7 @@
       document.getElementById(
         screenId
       )
-      .classList
-      .remove(
+      .classList.remove(
         'hidden'
       );
 
@@ -1317,6 +2046,7 @@
         'helpScreen'
       );
 
+
       showChildHelp();
     }
 
@@ -1326,8 +2056,7 @@
       document.getElementById(
         'childHelp'
       )
-      .classList
-      .remove(
+      .classList.remove(
         'hidden'
       );
 
@@ -1335,8 +2064,7 @@
       document.getElementById(
         'adultHelp'
       )
-      .classList
-      .add(
+      .classList.add(
         'hidden'
       );
 
@@ -1344,8 +2072,7 @@
       document.getElementById(
         'childTab'
       )
-      .classList
-      .add(
+      .classList.add(
         'active'
       );
 
@@ -1353,8 +2080,7 @@
       document.getElementById(
         'adultTab'
       )
-      .classList
-      .remove(
+      .classList.remove(
         'active'
       );
     }
@@ -1365,8 +2091,7 @@
       document.getElementById(
         'adultHelp'
       )
-      .classList
-      .remove(
+      .classList.remove(
         'hidden'
       );
 
@@ -1374,8 +2099,7 @@
       document.getElementById(
         'childHelp'
       )
-      .classList
-      .add(
+      .classList.add(
         'hidden'
       );
 
@@ -1383,8 +2107,7 @@
       document.getElementById(
         'adultTab'
       )
-      .classList
-      .add(
+      .classList.add(
         'active'
       );
 
@@ -1392,8 +2115,7 @@
       document.getElementById(
         'childTab'
       )
-      .classList
-      .remove(
+      .classList.remove(
         'active'
       );
     }
@@ -1401,12 +2123,13 @@
 
 
     /* =========================
-       PLAY GAME LIST
+       PLAY LIST
     ========================= */
 
     function openPlayList() {
 
       renderPlayGameList();
+
 
       showScreen(
         'playScreen'
@@ -1423,11 +2146,13 @@
 
 
       if (
-        games.length === 0
+        games.length ===
+        0
       ) {
 
         container.innerHTML =
           '<div class="card">No spelling games have been created yet.</div>';
+
 
         return;
       }
@@ -1470,7 +2195,7 @@
 
 
     /* =========================
-       CHILD PLAY MODE
+       CHILD PLAY
     ========================= */
 
     function startChildGame(
@@ -1478,13 +2203,17 @@
     ) {
 
       if (
-        games[gameIndex]
-          .words.length === 0
+        games[
+          gameIndex
+        ]
+        .words.length ===
+        0
       ) {
 
         alert(
           'This game does not have any words yet.'
         );
+
 
         return;
       }
@@ -1511,7 +2240,7 @@
     }
 
 
-    function renderChildWord() {
+    async function renderChildWord() {
 
       const game =
         games[
@@ -1557,6 +2286,12 @@
         }`;
 
 
+      await displayWordImage(
+        word.id,
+        'childPicture'
+      );
+
+
       const hintBox =
         document.getElementById(
           'childHint'
@@ -1572,10 +2307,9 @@
           word.hint;
 
 
-        hintBox.classList
-          .remove(
-            'hidden'
-          );
+        hintBox.classList.remove(
+          'hidden'
+        );
 
       } else {
 
@@ -1583,10 +2317,9 @@
           '';
 
 
-        hintBox.classList
-          .add(
-            'hidden'
-          );
+        hintBox.classList.add(
+          'hidden'
+        );
       }
 
 
@@ -1607,8 +2340,7 @@
       document.getElementById(
         'childCheckButton'
       )
-      .classList
-      .remove(
+      .classList.remove(
         'hidden'
       );
 
@@ -1616,8 +2348,7 @@
       document.getElementById(
         'childNextButton'
       )
-      .classList
-      .add(
+      .classList.add(
         'hidden'
       );
 
@@ -1708,10 +2439,9 @@
               });
 
 
-              button.classList
-                .add(
-                  'used'
-                );
+              button.classList.add(
+                'used'
+              );
 
 
               renderChildAnswer();
@@ -1769,8 +2499,7 @@
 
 
               card.sourceButton
-                ?.classList
-                .remove(
+                ?.classList.remove(
                   'used'
                 );
 
@@ -1838,11 +2567,13 @@
 
 
       if (
-        chosen === expected
+        chosen ===
+        expected
       ) {
 
         const tries =
-          childAttempts + 1;
+          childAttempts +
+          1;
 
 
         feedback.textContent =
@@ -1868,6 +2599,7 @@
 
         finishChildWord();
 
+
         return;
       }
 
@@ -1876,7 +2608,8 @@
 
 
       if (
-        childAttempts === 1
+        childAttempts ===
+        1
       ) {
 
         feedback.textContent =
@@ -1935,10 +2668,9 @@
       .forEach(
         button => {
 
-          button.classList
-            .remove(
-              'used'
-            );
+          button.classList.remove(
+            'used'
+          );
         }
       );
     }
@@ -1999,8 +2731,7 @@
       document.getElementById(
         'childCheckButton'
       )
-      .classList
-      .add(
+      .classList.add(
         'hidden'
       );
 
@@ -2008,8 +2739,7 @@
       document.getElementById(
         'childNextButton'
       )
-      .classList
-      .remove(
+      .classList.remove(
         'hidden'
       );
     }
@@ -2025,12 +2755,15 @@
 
       if (
         childWordIndex <
-        game.words.length - 1
+        game.words.length -
+        1
       ) {
 
         childWordIndex++;
 
+
         renderChildWord();
+
 
         return;
       }
@@ -2038,7 +2771,9 @@
 
       saveCurrentResults();
 
+
       renderResults();
+
 
       showScreen(
         'resultsScreen'
@@ -2085,6 +2820,7 @@
 
       renderResults();
 
+
       showScreen(
         'resultsScreen'
       );
@@ -2110,7 +2846,8 @@
       if (
         !saved ||
         !saved.results ||
-        saved.results.length === 0
+        saved.results.length ===
+        0
       ) {
 
         container.innerHTML = `
@@ -2120,6 +2857,7 @@
           </div>
 
         `;
+
 
         return;
       }
@@ -2295,12 +3033,13 @@
 
 
     /* =========================
-       CREATE / EDIT
+       CREATE / EDIT LIST
     ========================= */
 
     function openCreateList() {
 
       renderEditGameList();
+
 
       showScreen(
         'createScreen'
@@ -2317,11 +3056,13 @@
 
 
       if (
-        games.length === 0
+        games.length ===
+        0
       ) {
 
         container.innerHTML =
           '<div class="card">No games yet. Create your first spelling game.</div>';
+
 
         return;
       }
@@ -2375,18 +3116,25 @@
     function createNewGame() {
 
       if (
-        games.length >= 20
+        games.length >=
+        20
       ) {
 
         alert(
           'You can save up to 20 spelling games.'
         );
 
+
         return;
       }
 
 
       games.push({
+
+        id:
+          makeId(
+            'game'
+          ),
 
         name:
           'New Spelling Game',
@@ -2401,7 +3149,8 @@
 
 
       currentGameIndex =
-        games.length - 1;
+        games.length -
+        1;
 
 
       openEditor(
@@ -2410,7 +3159,7 @@
     }
 
 
-    function deleteGame(
+    async function deleteGame(
       index
     ) {
 
@@ -2421,6 +3170,32 @@
       ) {
 
         return;
+      }
+
+
+      const game =
+        games[
+          index
+        ];
+
+
+      for (
+        const word of
+        game.words
+      ) {
+
+        try {
+
+          await deleteImageBlob(
+            word.id
+          );
+
+        } catch (error) {
+
+          console.error(
+            error
+          );
+        }
       }
 
 
@@ -2437,6 +3212,11 @@
     }
 
 
+
+    /* =========================
+       GAME EDITOR
+    ========================= */
+
     function openEditor(
       index
     ) {
@@ -2449,7 +3229,9 @@
         'gameNameInput'
       )
       .value =
-        games[index].name;
+        games[
+          index
+        ].name;
 
 
       renderWordEditor();
@@ -2479,6 +3261,7 @@
           'Please enter a game name.'
         );
 
+
         return;
       }
 
@@ -2507,18 +3290,25 @@
 
 
       if (
-        game.words.length >= 20
+        game.words.length >=
+        20
       ) {
 
         alert(
           'You can add up to 20 words to a game.'
         );
 
+
         return;
       }
 
 
       game.words.push({
+
+        id:
+          makeId(
+            'word'
+          ),
 
         word:
           'New word',
@@ -2539,13 +3329,15 @@
 
 
       renderWordEditor(
-        game.words.length - 1
+        game.words.length -
+        1
       );
     }
 
 
     function renderWordEditor(
-      openIndex = -1
+      openIndex =
+        -1
     ) {
 
       const game =
@@ -2569,7 +3361,8 @@
 
 
       if (
-        game.words.length === 0
+        game.words.length ===
+        0
       ) {
 
         container.innerHTML = `
@@ -2583,6 +3376,7 @@
           </div>
 
         `;
+
 
         return;
       }
@@ -2667,6 +3461,68 @@
                   ">${escapeHtml(
                     word.hint || ''
                   )}</textarea>
+
+              </div>
+
+
+              <div class="field">
+
+                <label>
+                  Picture (optional)
+                </label>
+
+                <div class="picture-editor">
+
+                  <div class="picture-preview-box">
+
+                    <span
+                      id="editor-picture-empty-${word.id}"
+                      class="small">
+                      No picture added
+                    </span>
+
+                    <img
+                      id="editor-picture-${word.id}"
+                      class="hidden"
+                      alt="Picture for ${escapeAttribute(
+                        word.word
+                      )}">
+
+                  </div>
+
+
+                  <div class="picture-controls">
+
+                    <input
+                      class="file-input"
+                      type="file"
+                      accept="image/*"
+                      onchange="
+                        handlePictureUpload(
+                          '${word.id}',
+                          this.files[0],
+                          ${wordIndex}
+                        )
+                      ">
+
+                    <button
+                      class="danger"
+                      onclick="
+                        removeWordPicture(
+                          '${word.id}',
+                          ${wordIndex}
+                        )
+                      ">
+                      Remove Picture
+                    </button>
+
+                    <div class="small">
+                      The app will automatically resize large pictures before saving them.
+                    </div>
+
+                  </div>
+
+                </div>
 
               </div>
 
@@ -2793,6 +3649,154 @@
 
         `
         ).join('');
+
+
+      loadEditorPictures();
+    }
+
+
+    async function loadEditorPictures() {
+
+      const game =
+        games[
+          currentGameIndex
+        ];
+
+
+      for (
+        const word of
+        game.words
+      ) {
+
+        const found =
+          await displayWordImage(
+            word.id,
+            `editor-picture-${word.id}`
+          );
+
+
+        const empty =
+          document.getElementById(
+            `editor-picture-empty-${word.id}`
+          );
+
+
+        if (
+          empty
+        ) {
+
+          if (
+            found
+          ) {
+
+            empty.classList.add(
+              'hidden'
+            );
+
+          } else {
+
+            empty.classList.remove(
+              'hidden'
+            );
+          }
+        }
+      }
+    }
+
+
+    async function handlePictureUpload(
+      wordId,
+      file,
+      wordIndex
+    ) {
+
+      if (
+        !file
+      ) {
+
+        return;
+      }
+
+
+      if (
+        !file.type.startsWith(
+          'image/'
+        )
+      ) {
+
+        alert(
+          'Please choose an image file.'
+        );
+
+
+        return;
+      }
+
+
+      try {
+
+        const resizedBlob =
+          await resizeImageFile(
+            file
+          );
+
+
+        await saveImageBlob(
+          wordId,
+          resizedBlob
+        );
+
+
+        alert(
+          'Picture saved.'
+        );
+
+
+        renderWordEditor(
+          wordIndex
+        );
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+
+        alert(
+          'The picture could not be saved. Try a different image.'
+        );
+      }
+    }
+
+
+    async function removeWordPicture(
+      wordId,
+      wordIndex
+    ) {
+
+      try {
+
+        await deleteImageBlob(
+          wordId
+        );
+
+
+        renderWordEditor(
+          wordIndex
+        );
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
+
+
+        alert(
+          'The picture could not be removed.'
+        );
+      }
     }
 
 
@@ -2803,7 +3807,8 @@
     ) {
 
       if (
-        cards.length === 0
+        cards.length ===
+        0
       ) {
 
         return `
@@ -2915,8 +3920,7 @@
           document.getElementById(
             `word-detail-${index}`
           )
-          ?.classList
-          .remove(
+          ?.classList.remove(
             'hidden'
           );
 
@@ -2951,8 +3955,7 @@
           document.getElementById(
             `word-detail-${index}`
           )
-          ?.classList
-          .add(
+          ?.classList.add(
             'hidden'
           );
 
@@ -3049,6 +4052,7 @@
           'Please type something on the card first.'
         );
 
+
         return;
       }
 
@@ -3137,7 +4141,7 @@
     }
 
 
-    function deleteWord(
+    async function deleteWord(
       index
     ) {
 
@@ -3148,6 +4152,29 @@
       ) {
 
         return;
+      }
+
+
+      const word =
+        games[
+          currentGameIndex
+        ]
+        .words[
+          index
+        ];
+
+
+      try {
+
+        await deleteImageBlob(
+          word.id
+        );
+
+      } catch (error) {
+
+        console.error(
+          error
+        );
       }
 
 
@@ -3190,7 +4217,7 @@
     }
 
 
-    function renderPreview() {
+    async function renderPreview() {
 
       const game =
         games[
@@ -3202,6 +4229,12 @@
         game.words[
           currentPreviewWordIndex
         ];
+
+
+      await displayWordImage(
+        word.id,
+        'previewPicture'
+      );
 
 
       const hintBox =
@@ -3219,10 +4252,9 @@
           word.hint;
 
 
-        hintBox.classList
-          .remove(
-            'hidden'
-          );
+        hintBox.classList.remove(
+          'hidden'
+        );
 
       } else {
 
@@ -3230,10 +4262,9 @@
           '';
 
 
-        hintBox.classList
-          .add(
-            'hidden'
-          );
+        hintBox.classList.add(
+          'hidden'
+        );
       }
 
 
@@ -3329,10 +4360,9 @@
               });
 
 
-              button.classList
-                .add(
-                  'used'
-                );
+              button.classList.add(
+                'used'
+              );
 
 
               renderPreviewAnswer();
@@ -3382,8 +4412,7 @@
             () => {
 
               card.sourceButton
-                ?.classList
-                .remove(
+                ?.classList.remove(
                   'used'
                 );
 
@@ -3443,7 +4472,8 @@
 
 
       if (
-        chosen === expected
+        chosen ===
+        expected
       ) {
 
         feedback.textContent =
@@ -3466,6 +4496,7 @@
 
         currentPreviewWordIndex--;
 
+
         renderPreview();
       }
     }
@@ -3481,10 +4512,12 @@
 
       if (
         currentPreviewWordIndex <
-        game.words.length - 1
+        game.words.length -
+        1
       ) {
 
         currentPreviewWordIndex++;
+
 
         renderPreview();
       }
@@ -3500,109 +4533,6 @@
 
       showScreen(
         'editorScreen'
-      );
-    }
-
-
-
-    /* =========================
-       HELPERS
-    ========================= */
-
-    function shuffleArray(
-      array
-    ) {
-
-      const copy =
-        [...array];
-
-
-      for (
-        let i =
-          copy.length - 1;
-
-        i > 0;
-
-        i--
-      ) {
-
-        const j =
-          Math.floor(
-            Math.random() *
-            (i + 1)
-          );
-
-
-        [
-          copy[i],
-          copy[j]
-        ]
-        =
-        [
-          copy[j],
-          copy[i]
-        ];
-      }
-
-
-      return copy;
-    }
-
-
-    function capitalise(
-      text
-    ) {
-
-      return (
-        text.charAt(0)
-          .toUpperCase()
-        +
-        text.slice(1)
-      );
-    }
-
-
-    function escapeHtml(
-      text
-    ) {
-
-      return String(
-        text ?? ''
-      )
-
-        .replaceAll(
-          '&',
-          '&amp;'
-        )
-
-        .replaceAll(
-          '<',
-          '&lt;'
-        )
-
-        .replaceAll(
-          '>',
-          '&gt;'
-        )
-
-        .replaceAll(
-          '"',
-          '&quot;'
-        )
-
-        .replaceAll(
-          "'",
-          '&#039;'
-        );
-    }
-
-
-    function escapeAttribute(
-      text
-    ) {
-
-      return escapeHtml(
-        text
       );
     }
 
