@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Spelling Cards</title>
 
   <style>
@@ -44,6 +45,10 @@
       margin-top: 0;
     }
 
+    h3 {
+      margin-top: 0;
+    }
+
     .subtitle {
       font-size: 22px;
       margin-bottom: 35px;
@@ -73,6 +78,17 @@
       padding: 12px;
       border-radius: 10px;
       border: 1px solid #b7c4d1;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #b7c4d1;
+      resize: vertical;
     }
 
     .play {
@@ -219,11 +235,43 @@
       border: 2px solid rgba(0,0,0,0.06);
     }
 
-    .green { background: #9be39f; }
-    .blue { background: #91c9f7; }
-    .yellow { background: #ffe47a; }
-    .pink { background: #f5a6c8; }
-    .purple { background: #c8a7ef; }
+    .green {
+      background: #9be39f;
+    }
+
+    .blue {
+      background: #91c9f7;
+    }
+
+    .yellow {
+      background: #ffe47a;
+    }
+
+    .pink {
+      background: #f5a6c8;
+    }
+
+    .purple {
+      background: #c8a7ef;
+    }
+
+    .colour-meaning-row {
+      display: grid;
+      grid-template-columns: 130px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .colour-label {
+      min-height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #172033;
+    }
 
     .help-tabs {
       display: flex;
@@ -332,6 +380,16 @@
       background: #fff2dc;
     }
 
+    .word-hint {
+      max-width: 650px;
+      margin: 18px auto;
+      padding: 15px 20px;
+      border-radius: 14px;
+      background: #eef5fb;
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
     @media (max-width: 700px) {
       h1 {
         font-size: 40px;
@@ -350,7 +408,8 @@
       }
 
       .card-editor,
-      .add-card-row {
+      .add-card-row,
+      .colour-meaning-row {
         grid-template-columns: 1fr;
       }
     }
@@ -361,6 +420,7 @@
 
   <!-- HOME -->
   <main id="homeScreen" class="screen home">
+
     <h1>🔤 SPELLING CARDS</h1>
 
     <div class="subtitle">
@@ -368,48 +428,77 @@
     </div>
 
     <div class="menu">
-      <button class="play" onclick="openPlayList()">▶ Play a Game</button>
-      <button class="create" onclick="openCreateList()">✏️ Create / Edit</button>
-      <button class="results" onclick="openResults()">📊 Results</button>
-      <button class="help" onclick="openHelp()">📖 How to Setup &amp; Play</button>
+
+      <button class="play" onclick="openPlayList()">
+        ▶ Play a Game
+      </button>
+
+      <button class="create" onclick="openCreateList()">
+        ✏️ Create / Edit
+      </button>
+
+      <button class="results" onclick="openResults()">
+        📊 Results
+      </button>
+
+      <button class="help" onclick="openHelp()">
+        📖 How to Setup &amp; Play
+      </button>
+
     </div>
 
     <div class="note">
       Small steps. Big spelling success!
     </div>
+
   </main>
 
 
   <!-- PLAY LIST -->
   <section id="playScreen" class="screen hidden">
+
     <div class="content">
-      <button class="back" onclick="showScreen('homeScreen')">← Home</button>
+
+      <button class="back" onclick="showScreen('homeScreen')">
+        ← Home
+      </button>
 
       <h2>My Spelling Games</h2>
 
       <div id="playGameList"></div>
+
     </div>
+
   </section>
 
 
   <!-- CHILD PLAY SCREEN -->
   <section id="childPlayScreen" class="screen hidden">
+
     <div class="content">
 
-      <button class="back" onclick="openPlayList()">← Games</button>
+      <button class="back" onclick="openPlayList()">
+        ← Games
+      </button>
 
       <div class="card play-area">
 
         <div id="childGameName" class="game-heading"></div>
+
         <div id="childCounter" class="game-counter"></div>
 
-        <div class="answer-space" id="childAnswer"></div>
+        <div id="childHint"
+             class="word-hint hidden"></div>
+
+        <div class="answer-space"
+             id="childAnswer"></div>
 
         <div class="small">
           Choose the sound cards to make your word
         </div>
 
-        <div class="choice-area" id="childChoices"></div>
+        <div class="choice-area"
+             id="childChoices"></div>
 
         <button id="childCheckButton"
                 class="save-button"
@@ -417,7 +506,8 @@
           Check
         </button>
 
-        <div class="feedback" id="childFeedback"></div>
+        <div class="feedback"
+             id="childFeedback"></div>
 
         <button id="childNextButton"
                 class="next-button hidden"
@@ -426,40 +516,81 @@
         </button>
 
       </div>
+
     </div>
+
   </section>
 
 
   <!-- CREATE LIST -->
   <section id="createScreen" class="screen hidden">
+
     <div class="content">
-      <button class="back" onclick="showScreen('homeScreen')">← Home</button>
+
+      <button class="back" onclick="showScreen('homeScreen')">
+        ← Home
+      </button>
 
       <h2>Create / Edit</h2>
 
-      <button class="create-new" onclick="createNewGame()">
-        + Create New Game
-      </button>
+      <div class="row" style="margin-bottom:20px;">
+
+        <button class="create-new"
+                onclick="createNewGame()">
+          + Create New Game
+        </button>
+
+        <button class="secondary"
+                onclick="toggleColourMeanings()">
+          🎨 Name Colour Meanings
+        </button>
+
+      </div>
+
+      <div id="colourMeaningPanel"
+           class="card hidden">
+
+        <h3>Colour Meanings</h3>
+
+        <p class="small">
+          These meanings will be used as the default for your spelling games.
+        </p>
+
+        <div id="colourMeaningInputs"></div>
+
+        <button class="save-button"
+                onclick="saveColourMeanings()">
+          Save Colour Meanings
+        </button>
+
+      </div>
 
       <div id="editGameList"></div>
+
     </div>
+
   </section>
 
 
   <!-- GAME EDITOR -->
   <section id="editorScreen" class="screen hidden">
+
     <div class="content">
 
-      <button class="back" onclick="openCreateList()">← My Games</button>
+      <button class="back" onclick="openCreateList()">
+        ← My Games
+      </button>
 
       <div class="card">
 
         <div class="field">
+
           <label>Game name</label>
 
           <input id="gameNameInput"
                  type="text"
                  style="width:100%">
+
         </div>
 
         <div class="row editor-actions">
@@ -493,14 +624,17 @@
       <div id="wordEditorList"></div>
 
     </div>
+
   </section>
 
 
   <!-- PREVIEW -->
   <section id="previewScreen" class="screen hidden">
+
     <div class="content">
 
-      <div class="row" style="justify-content:space-between; margin-bottom:20px;">
+      <div class="row"
+           style="justify-content:space-between; margin-bottom:20px;">
 
         <button class="back"
                 onclick="returnToEditor()">
@@ -516,9 +650,13 @@
 
       <div class="card play-area">
 
-        <div id="previewCounter" class="small"></div>
+        <div id="previewCounter"
+             class="small"></div>
 
         <h2>Preview</h2>
+
+        <div id="previewHint"
+             class="word-hint hidden"></div>
 
         <div class="answer-space"
              id="previewAnswer"></div>
@@ -552,11 +690,13 @@
       </div>
 
     </div>
+
   </section>
 
 
   <!-- RESULTS -->
   <section id="resultsScreen" class="screen hidden">
+
     <div class="content">
 
       <button class="back"
@@ -569,11 +709,13 @@
       <div id="resultsContent"></div>
 
     </div>
+
   </section>
 
 
   <!-- HELP -->
   <section id="helpScreen" class="screen hidden">
+
     <div class="content">
 
       <button class="back"
@@ -597,7 +739,6 @@
         </button>
 
       </div>
-
 
       <div id="childHelp" class="card">
 
@@ -628,7 +769,6 @@
 
       </div>
 
-
       <div id="adultHelp" class="card hidden">
 
         <div class="help-step">
@@ -642,28 +782,34 @@
         </div>
 
         <div class="help-step">
-          <strong>3. Build the sound cards</strong><br>
+          <strong>3. Add a meaning or clue</strong><br>
+          Add an optional meaning, clue or sentence for each word.
+        </div>
+
+        <div class="help-step">
+          <strong>4. Build the sound cards</strong><br>
           Break each word into the sound cards you want the child to use.
         </div>
 
         <div class="help-step">
-          <strong>4. Choose colours</strong><br>
+          <strong>5. Choose colours</strong><br>
           Each correct or extra card can use the colour you choose.
         </div>
 
         <div class="help-step">
-          <strong>5. Preview</strong><br>
+          <strong>6. Preview</strong><br>
           Test the word as the child will see it.
         </div>
 
         <div class="help-step">
-          <strong>6. Save and play</strong><br>
+          <strong>7. Save and play</strong><br>
           Once you are happy with the game, it is ready to use.
         </div>
 
       </div>
 
     </div>
+
   </section>
 
 
@@ -673,63 +819,175 @@
     ['green', 'blue', 'yellow', 'pink', 'purple'];
 
 
+  const defaultColourMeanings = {
+
+    green:
+      'First letter of a syllable',
+
+    blue:
+      'Other consonant',
+
+    yellow:
+      'Vowel',
+
+    purple:
+      'Letter/pattern of the week',
+
+    pink:
+      'Last letter'
+
+  };
+
+
+  let colourMeanings =
+    JSON.parse(
+      localStorage.getItem(
+        'spellingCardsColourMeanings'
+      )
+    );
+
+
+  if (!colourMeanings) {
+
+    colourMeanings = {
+      ...defaultColourMeanings
+    };
+
+    saveColourMeaningsToStorage();
+  }
+
+
   let games =
-    JSON.parse(localStorage.getItem('spellingCardsGames'));
+    JSON.parse(
+      localStorage.getItem(
+        'spellingCardsGames'
+      )
+    );
 
 
   if (!games) {
 
     games = [
+
       {
-        name: 'Week 1 – ar sound',
+        name:
+          'Week 1 – ar sound',
 
         words: [
 
           {
             word: 'car',
 
+            hint: '',
+
             correct: [
-              { text: 'c', colour: 'green' },
-              { text: 'ar', colour: 'purple' }
+
+              {
+                text: 'c',
+                colour: 'green'
+              },
+
+              {
+                text: 'ar',
+                colour: 'purple'
+              }
+
             ],
 
             extra: [
-              { text: 'or', colour: 'purple' }
+
+              {
+                text: 'or',
+                colour: 'purple'
+              }
+
             ]
           },
+
 
           {
             word: 'farm',
 
+            hint:
+              'A place where animals or crops may be raised.',
+
             correct: [
-              { text: 'f', colour: 'green' },
-              { text: 'ar', colour: 'purple' },
-              { text: 'm', colour: 'pink' }
+
+              {
+                text: 'f',
+                colour: 'green'
+              },
+
+              {
+                text: 'ar',
+                colour: 'purple'
+              },
+
+              {
+                text: 'm',
+                colour: 'pink'
+              }
+
             ],
 
             extra: [
-              { text: 'b', colour: 'green' },
-              { text: 'a', colour: 'purple' }
+
+              {
+                text: 'b',
+                colour: 'green'
+              },
+
+              {
+                text: 'a',
+                colour: 'purple'
+              }
+
             ]
           },
+
 
           {
             word: 'start',
 
+            hint: '',
+
             correct: [
-              { text: 'st', colour: 'green' },
-              { text: 'ar', colour: 'purple' },
-              { text: 't', colour: 'pink' }
+
+              {
+                text: 'st',
+                colour: 'green'
+              },
+
+              {
+                text: 'ar',
+                colour: 'purple'
+              },
+
+              {
+                text: 't',
+                colour: 'pink'
+              }
+
             ],
 
             extra: [
-              { text: 's', colour: 'green' },
-              { text: 'or', colour: 'purple' }
+
+              {
+                text: 's',
+                colour: 'green'
+              },
+
+              {
+                text: 'or',
+                colour: 'purple'
+              }
+
             ]
           }
 
         ]
       }
+
     ];
 
     saveGames();
@@ -739,17 +997,125 @@
   let currentGameIndex = 0;
 
   let currentPreviewWordIndex = 0;
+
   let previewSelected = [];
 
 
   let childWordIndex = 0;
+
   let childSelected = [];
+
   let childAttempts = 0;
+
   let childWordFinished = false;
+
   let currentGameResults = [];
 
 
+  function saveColourMeaningsToStorage() {
+
+    localStorage.setItem(
+      'spellingCardsColourMeanings',
+      JSON.stringify(
+        colourMeanings
+      )
+    );
+  }
+
+
+  function toggleColourMeanings() {
+
+    const panel =
+      document.getElementById(
+        'colourMeaningPanel'
+      );
+
+
+    panel.classList.toggle(
+      'hidden'
+    );
+
+
+    if (
+      !panel.classList.contains(
+        'hidden'
+      )
+    ) {
+
+      renderColourMeaningInputs();
+    }
+  }
+
+
+  function renderColourMeaningInputs() {
+
+    const container =
+      document.getElementById(
+        'colourMeaningInputs'
+      );
+
+
+    container.innerHTML =
+      colourOptions.map(
+        colour => `
+
+        <div class="colour-meaning-row">
+
+          <div class="colour-label ${colour}">
+            ${capitalise(colour)}
+          </div>
+
+          <input
+            id="meaning-${colour}"
+            type="text"
+            value="${escapeAttribute(
+              colourMeanings[colour] || ''
+            )}">
+
+        </div>
+
+      `).join('');
+  }
+
+
+  function saveColourMeanings() {
+
+    colourOptions.forEach(
+      colour => {
+
+        const input =
+          document.getElementById(
+            `meaning-${colour}`
+          );
+
+
+        if (input) {
+
+          colourMeanings[colour] =
+            input.value.trim();
+        }
+      }
+    );
+
+
+    saveColourMeaningsToStorage();
+
+
+    alert(
+      'Colour meanings saved.'
+    );
+
+
+    document.getElementById(
+      'colourMeaningPanel'
+    )
+    .classList
+    .add('hidden');
+  }
+
+
   function saveGames() {
+
     localStorage.setItem(
       'spellingCardsGames',
       JSON.stringify(games)
@@ -759,73 +1125,128 @@
 
   function showScreen(screenId) {
 
-    document.querySelectorAll('.screen')
-      .forEach(screen => {
-        screen.classList.add('hidden');
-      });
+    document.querySelectorAll(
+      '.screen'
+    )
+    .forEach(
+      screen => {
 
-    document.getElementById(screenId)
-      .classList.remove('hidden');
+        screen.classList.add(
+          'hidden'
+        );
+      }
+    );
 
-    window.scrollTo(0, 0);
+
+    document.getElementById(
+      screenId
+    )
+    .classList
+    .remove('hidden');
+
+
+    window.scrollTo(
+      0,
+      0
+    );
   }
 
 
   function openHelp() {
-    showScreen('helpScreen');
+
+    showScreen(
+      'helpScreen'
+    );
+
     showChildHelp();
   }
 
 
   function showChildHelp() {
 
-    document.getElementById('childHelp')
-      .classList.remove('hidden');
+    document.getElementById(
+      'childHelp'
+    )
+    .classList
+    .remove('hidden');
 
-    document.getElementById('adultHelp')
-      .classList.add('hidden');
 
-    document.getElementById('childTab')
-      .classList.add('active');
+    document.getElementById(
+      'adultHelp'
+    )
+    .classList
+    .add('hidden');
 
-    document.getElementById('adultTab')
-      .classList.remove('active');
+
+    document.getElementById(
+      'childTab'
+    )
+    .classList
+    .add('active');
+
+
+    document.getElementById(
+      'adultTab'
+    )
+    .classList
+    .remove('active');
   }
 
 
   function showAdultHelp() {
 
-    document.getElementById('adultHelp')
-      .classList.remove('hidden');
+    document.getElementById(
+      'adultHelp'
+    )
+    .classList
+    .remove('hidden');
 
-    document.getElementById('childHelp')
-      .classList.add('hidden');
 
-    document.getElementById('adultTab')
-      .classList.add('active');
+    document.getElementById(
+      'childHelp'
+    )
+    .classList
+    .add('hidden');
 
-    document.getElementById('childTab')
-      .classList.remove('active');
+
+    document.getElementById(
+      'adultTab'
+    )
+    .classList
+    .add('active');
+
+
+    document.getElementById(
+      'childTab'
+    )
+    .classList
+    .remove('active');
   }
 
 
-  // -------------------------
   // PLAY LIST
-  // -------------------------
 
   function openPlayList() {
+
     renderPlayGameList();
-    showScreen('playScreen');
+
+    showScreen(
+      'playScreen'
+    );
   }
 
 
   function renderPlayGameList() {
 
     const container =
-      document.getElementById('playGameList');
+      document.getElementById(
+        'playGameList'
+      );
 
 
-    if (games.length === 0) {
+    if (
+      games.length === 0
+    ) {
 
       container.innerHTML =
         '<div class="card">No spelling games have been created yet.</div>';
@@ -835,20 +1256,29 @@
 
 
     container.innerHTML =
-      games.map((game, index) => `
+      games.map(
+        (game, index) => `
 
         <div class="card game-row">
 
           <div>
-            <strong>${escapeHtml(game.name)}</strong>
+
+            <strong>
+              ${escapeHtml(
+                game.name
+              )}
+            </strong>
+
             <p>
               ${game.words.length}
               word${game.words.length === 1 ? '' : 's'}
             </p>
+
           </div>
 
-          <button class="play"
-                  onclick="startChildGame(${index})">
+          <button
+            class="play"
+            onclick="startChildGame(${index})">
             Play
           </button>
 
@@ -858,70 +1288,147 @@
   }
 
 
-  // -------------------------
   // CHILD GAME
-  // -------------------------
 
-  function startChildGame(gameIndex) {
+  function startChildGame(
+    gameIndex
+  ) {
 
-    if (games[gameIndex].words.length === 0) {
-      alert('This game does not have any words yet.');
+    if (
+      games[gameIndex]
+        .words.length === 0
+    ) {
+
+      alert(
+        'This game does not have any words yet.'
+      );
+
       return;
     }
 
-    currentGameIndex = gameIndex;
+
+    currentGameIndex =
+      gameIndex;
+
 
     childWordIndex = 0;
-    childAttempts = 0;
-    childSelected = [];
-    childWordFinished = false;
 
-    currentGameResults = [];
+    childAttempts = 0;
+
+    childSelected = [];
+
+    childWordFinished =
+      false;
+
+
+    currentGameResults =
+      [];
+
 
     renderChildWord();
 
-    showScreen('childPlayScreen');
+
+    showScreen(
+      'childPlayScreen'
+    );
   }
 
 
   function renderChildWord() {
 
     const game =
-      games[currentGameIndex];
+      games[
+        currentGameIndex
+      ];
+
 
     const word =
-      game.words[childWordIndex];
+      game.words[
+        childWordIndex
+      ];
 
 
     childSelected = [];
+
     childAttempts = 0;
-    childWordFinished = false;
+
+    childWordFinished =
+      false;
 
 
-    document.getElementById('childGameName')
-      .innerHTML =
-        `<h2>${escapeHtml(game.name)}</h2>`;
+    document.getElementById(
+      'childGameName'
+    )
+    .innerHTML =
+      `<h2>${escapeHtml(
+        game.name
+      )}</h2>`;
 
 
-    document.getElementById('childCounter')
-      .textContent =
-        `Word ${childWordIndex + 1} of ${game.words.length}`;
+    document.getElementById(
+      'childCounter'
+    )
+    .textContent =
+      `Word ${
+        childWordIndex + 1
+      } of ${
+        game.words.length
+      }`;
 
 
-    document.getElementById('childAnswer')
-      .innerHTML = '';
+    const hintBox =
+      document.getElementById(
+        'childHint'
+      );
 
 
-    document.getElementById('childFeedback')
-      .textContent = '';
+    if (
+      word.hint &&
+      word.hint.trim()
+    ) {
+
+      hintBox.textContent =
+        word.hint;
 
 
-    document.getElementById('childCheckButton')
-      .classList.remove('hidden');
+      hintBox.classList
+        .remove('hidden');
+
+    } else {
+
+      hintBox.textContent =
+        '';
 
 
-    document.getElementById('childNextButton')
-      .classList.add('hidden');
+      hintBox.classList
+        .add('hidden');
+    }
+
+
+    document.getElementById(
+      'childAnswer'
+    )
+    .innerHTML = '';
+
+
+    document.getElementById(
+      'childFeedback'
+    )
+    .textContent = '';
+
+
+    document.getElementById(
+      'childCheckButton'
+    )
+    .classList
+    .remove('hidden');
+
+
+    document.getElementById(
+      'childNextButton'
+    )
+    .classList
+    .add('hidden');
 
 
     renderChildChoices();
@@ -931,138 +1438,228 @@
   function renderChildChoices() {
 
     const word =
-      games[currentGameIndex]
-        .words[childWordIndex];
+      games[
+        currentGameIndex
+      ]
+      .words[
+        childWordIndex
+      ];
 
 
     const choices =
       shuffleArray([
-        ...word.correct.map(card => ({ ...card })),
-        ...word.extra.map(card => ({ ...card }))
+
+        ...word.correct.map(
+          card => ({
+            ...card
+          })
+        ),
+
+        ...word.extra.map(
+          card => ({
+            ...card
+          })
+        )
+
       ]);
 
 
     const container =
-      document.getElementById('childChoices');
+      document.getElementById(
+        'childChoices'
+      );
 
 
-    container.innerHTML = '';
+    container.innerHTML =
+      '';
 
 
-    choices.forEach(card => {
+    choices.forEach(
+      card => {
 
-      const button =
-        document.createElement('button');
-
-      button.className =
-        `choice-card sound-card ${card.colour}`;
-
-      button.textContent =
-        card.text;
+        const button =
+          document.createElement(
+            'button'
+          );
 
 
-      button.addEventListener('click', () => {
-
-        if (childWordFinished) return;
-
-        childSelected.push({
-          text: card.text,
-          colour: card.colour,
-          sourceButton: button
-        });
-
-        button.classList.add('used');
-
-        renderChildAnswer();
-
-      });
+        button.className =
+          `choice-card sound-card ${card.colour}`;
 
 
-      container.appendChild(button);
+        button.textContent =
+          card.text;
 
-    });
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            if (
+              childWordFinished
+            ) return;
+
+
+            childSelected.push({
+
+              text:
+                card.text,
+
+              colour:
+                card.colour,
+
+              sourceButton:
+                button
+
+            });
+
+
+            button.classList
+              .add('used');
+
+
+            renderChildAnswer();
+          }
+        );
+
+
+        container
+          .appendChild(
+            button
+          );
+      }
+    );
   }
 
 
   function renderChildAnswer() {
 
     const container =
-      document.getElementById('childAnswer');
-
-    container.innerHTML = '';
-
-
-    childSelected.forEach((card, index) => {
-
-      const button =
-        document.createElement('button');
-
-      button.className =
-        `sound-card ${card.colour}`;
-
-      button.textContent =
-        card.text;
+      document.getElementById(
+        'childAnswer'
+      );
 
 
-      button.addEventListener('click', () => {
-
-        if (childWordFinished) return;
-
-        card.sourceButton
-          ?.classList.remove('used');
-
-        childSelected.splice(index, 1);
-
-        renderChildAnswer();
-      });
+    container.innerHTML =
+      '';
 
 
-      container.appendChild(button);
+    childSelected.forEach(
+      (card, index) => {
 
-    });
+        const button =
+          document.createElement(
+            'button'
+          );
+
+
+        button.className =
+          `sound-card ${card.colour}`;
+
+
+        button.textContent =
+          card.text;
+
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            if (
+              childWordFinished
+            ) return;
+
+
+            card.sourceButton
+              ?.classList
+              .remove('used');
+
+
+            childSelected.splice(
+              index,
+              1
+            );
+
+
+            renderChildAnswer();
+          }
+        );
+
+
+        container.appendChild(
+          button
+        );
+      }
+    );
   }
 
 
   function checkChildAnswer() {
 
-    if (childWordFinished) return;
+    if (
+      childWordFinished
+    ) return;
 
 
     const word =
-      games[currentGameIndex]
-        .words[childWordIndex];
+      games[
+        currentGameIndex
+      ]
+      .words[
+        childWordIndex
+      ];
 
 
     const expected =
       word.correct
-        .map(card => card.text)
+        .map(
+          card =>
+            card.text
+        )
         .join('|');
 
 
     const chosen =
       childSelected
-        .map(card => card.text)
+        .map(
+          card =>
+            card.text
+        )
         .join('|');
 
 
     const feedback =
-      document.getElementById('childFeedback');
+      document.getElementById(
+        'childFeedback'
+      );
 
 
-    if (chosen === expected) {
+    if (
+      chosen === expected
+    ) {
 
       const tries =
         childAttempts + 1;
+
 
       feedback.textContent =
         '⭐ You know your words! Great spelling!';
 
 
       currentGameResults.push({
-        word: word.word,
-        result: 'Great spelling!',
-        tries: tries,
-        needsPractice: false
+
+        word:
+          word.word,
+
+        result:
+          'Great spelling!',
+
+        tries:
+          tries,
+
+        needsPractice:
+          false
+
       });
 
 
@@ -1075,7 +1672,9 @@
     childAttempts++;
 
 
-    if (childAttempts === 1) {
+    if (
+      childAttempts === 1
+    ) {
 
       feedback.textContent =
         '⭐ Keep going! You’re really listening to the sounds in your word.';
@@ -1093,10 +1692,19 @@
 
 
       currentGameResults.push({
-        word: word.word,
-        result: 'Extra practice needed',
-        tries: '2+',
-        needsPractice: true
+
+        word:
+          word.word,
+
+        result:
+          'Extra practice needed',
+
+        tries:
+          '2+',
+
+        needsPractice:
+          true
+
       });
 
 
@@ -1109,72 +1717,105 @@
 
     childSelected = [];
 
-    document.getElementById('childAnswer')
-      .innerHTML = '';
+
+    document.getElementById(
+      'childAnswer'
+    )
+    .innerHTML = '';
+
 
     document.querySelectorAll(
       '#childChoices .choice-card'
-    ).forEach(button => {
+    )
+    .forEach(
+      button => {
 
-      button.classList.remove('used');
-
-    });
+        button.classList
+          .remove('used');
+      }
+    );
   }
 
 
   function showCorrectChildAnswer() {
 
     const word =
-      games[currentGameIndex]
-        .words[childWordIndex];
+      games[
+        currentGameIndex
+      ]
+      .words[
+        childWordIndex
+      ];
 
 
     const answer =
-      document.getElementById('childAnswer');
+      document.getElementById(
+        'childAnswer'
+      );
 
 
-    answer.innerHTML = '';
+    answer.innerHTML =
+      '';
 
 
-    word.correct.forEach(card => {
+    word.correct.forEach(
+      card => {
 
-      const item =
-        document.createElement('div');
+        const item =
+          document.createElement(
+            'div'
+          );
 
-      item.className =
-        `sound-card ${card.colour}`;
 
-      item.textContent =
-        card.text;
+        item.className =
+          `sound-card ${card.colour}`;
 
-      answer.appendChild(item);
 
-    });
+        item.textContent =
+          card.text;
+
+
+        answer.appendChild(
+          item
+        );
+      }
+    );
   }
 
 
   function finishChildWord() {
 
-    childWordFinished = true;
+    childWordFinished =
+      true;
 
 
-    document.getElementById('childCheckButton')
-      .classList.add('hidden');
+    document.getElementById(
+      'childCheckButton'
+    )
+    .classList
+    .add('hidden');
 
 
-    document.getElementById('childNextButton')
-      .classList.remove('hidden');
+    document.getElementById(
+      'childNextButton'
+    )
+    .classList
+    .remove('hidden');
   }
 
 
   function nextChildWord() {
 
     const game =
-      games[currentGameIndex];
+      games[
+        currentGameIndex
+      ];
 
 
-    if (childWordIndex <
-        game.words.length - 1) {
+    if (
+      childWordIndex <
+      game.words.length - 1
+    ) {
 
       childWordIndex++;
 
@@ -1188,7 +1829,9 @@
 
     renderResults();
 
-    showScreen('resultsScreen');
+    showScreen(
+      'resultsScreen'
+    );
   }
 
 
@@ -1197,30 +1840,40 @@
     const resultData = {
 
       gameName:
-        games[currentGameIndex].name,
+        games[
+          currentGameIndex
+        ].name,
 
       date:
-        new Date().toLocaleDateString('en-AU'),
+        new Date()
+          .toLocaleDateString(
+            'en-AU'
+          ),
 
       results:
         currentGameResults
+
     };
 
 
     localStorage.setItem(
       'spellingCardsLastResults',
-      JSON.stringify(resultData)
+      JSON.stringify(
+        resultData
+      )
     );
   }
 
 
-  // -------------------------
   // RESULTS
-  // -------------------------
 
   function openResults() {
+
     renderResults();
-    showScreen('resultsScreen');
+
+    showScreen(
+      'resultsScreen'
+    );
   }
 
 
@@ -1235,12 +1888,16 @@
 
 
     const container =
-      document.getElementById('resultsContent');
+      document.getElementById(
+        'resultsContent'
+      );
 
 
-    if (!saved ||
-        !saved.results ||
-        saved.results.length === 0) {
+    if (
+      !saved ||
+      !saved.results ||
+      saved.results.length === 0
+    ) {
 
       container.innerHTML = `
         <div class="card">
@@ -1254,56 +1911,90 @@
 
     const known =
       saved.results
-        .filter(item => !item.needsPractice)
-        .map(item => item.word);
+        .filter(
+          item =>
+            !item.needsPractice
+        )
+        .map(
+          item =>
+            item.word
+        );
 
 
     const practice =
       saved.results
-        .filter(item => item.needsPractice)
-        .map(item => item.word);
+        .filter(
+          item =>
+            item.needsPractice
+        )
+        .map(
+          item =>
+            item.word
+        );
 
 
     container.innerHTML = `
 
       <div class="card">
 
-        <h2>🏆 Great work!</h2>
+        <h2>
+          🏆 Great work!
+        </h2>
 
         <p>
           You finished
-          <strong>${escapeHtml(saved.gameName)}</strong>.
+          <strong>
+            ${escapeHtml(
+              saved.gameName
+            )}
+          </strong>.
         </p>
 
         <p class="small">
-          ${escapeHtml(saved.date)}
+          ${escapeHtml(
+            saved.date
+          )}
         </p>
 
 
         <table class="result-table">
 
           <thead>
+
             <tr>
               <th>Word</th>
               <th>Result</th>
               <th>Tries</th>
             </tr>
+
           </thead>
+
 
           <tbody>
 
-            ${saved.results.map(item => `
+            ${saved.results.map(
+              item => `
 
               <tr>
-                <td>${escapeHtml(item.word)}</td>
 
                 <td>
-                  ${escapeHtml(item.result)}
+                  ${escapeHtml(
+                    item.word
+                  )}
                 </td>
 
                 <td>
-                  ${escapeHtml(item.tries)}
+                  ${escapeHtml(
+                    item.result
+                  )}
                 </td>
+
+                <td>
+                  ${escapeHtml(
+                    item.tries
+                  )}
+                </td>
+
               </tr>
 
             `).join('')}
@@ -1317,12 +2008,22 @@
 
       <div class="card summary-good">
 
-        <h3>⭐ Words you knew well</h3>
+        <h3>
+          ⭐ Words you knew well
+        </h3>
 
         <p>
-          ${known.length
-            ? known.map(escapeHtml).join(', ')
-            : 'Keep practising.'}
+          ${
+            known.length
+            ?
+            known
+              .map(
+                escapeHtml
+              )
+              .join(', ')
+            :
+            'Keep practising.'
+          }
         </p>
 
       </div>
@@ -1330,12 +2031,22 @@
 
       <div class="card summary-practice">
 
-        <h3>🌱 Words that need extra practice</h3>
+        <h3>
+          🌱 Words that need extra practice
+        </h3>
 
         <p>
-          ${practice.length
-            ? practice.map(escapeHtml).join(', ')
-            : 'None — great work!'}
+          ${
+            practice.length
+            ?
+            practice
+              .map(
+                escapeHtml
+              )
+              .join(', ')
+            :
+            'None — great work!'
+          }
         </p>
 
       </div>
@@ -1343,38 +2054,47 @@
 
       <div class="row">
 
-        <button class="secondary"
-                onclick="showScreen('homeScreen')">
+        <button
+          class="secondary"
+          onclick="showScreen('homeScreen')">
           Home
         </button>
 
-        <button class="play"
-                onclick="startChildGame(currentGameIndex)">
+        <button
+          class="play"
+          onclick="startChildGame(currentGameIndex)">
           Play Again
         </button>
 
       </div>
+
     `;
   }
 
 
-  // -------------------------
   // CREATE / EDIT
-  // -------------------------
 
   function openCreateList() {
+
     renderEditGameList();
-    showScreen('createScreen');
+
+    showScreen(
+      'createScreen'
+    );
   }
 
 
   function renderEditGameList() {
 
     const container =
-      document.getElementById('editGameList');
+      document.getElementById(
+        'editGameList'
+      );
 
 
-    if (games.length === 0) {
+    if (
+      games.length === 0
+    ) {
 
       container.innerHTML =
         '<div class="card">No games yet. Create your first spelling game.</div>';
@@ -1384,28 +2104,38 @@
 
 
     container.innerHTML =
-      games.map((game, index) => `
+      games.map(
+        (game, index) => `
 
         <div class="card game-row">
 
           <div>
-            <strong>${escapeHtml(game.name)}</strong>
+
+            <strong>
+              ${escapeHtml(
+                game.name
+              )}
+            </strong>
 
             <p>
-              ${game.words.length} / 20 words
+              ${game.words.length}
+              / 20 words
             </p>
+
           </div>
 
 
           <div class="row">
 
-            <button class="edit-button"
-                    onclick="openEditor(${index})">
+            <button
+              class="edit-button"
+              onclick="openEditor(${index})">
               Edit
             </button>
 
-            <button class="danger"
-                    onclick="deleteGame(${index})">
+            <button
+              class="danger"
+              onclick="deleteGame(${index})">
               Delete
             </button>
 
@@ -1419,7 +2149,9 @@
 
   function createNewGame() {
 
-    if (games.length >= 20) {
+    if (
+      games.length >= 20
+    ) {
 
       alert(
         'You can save up to 20 spelling games.'
@@ -1430,8 +2162,13 @@
 
 
     games.push({
-      name: 'New Spelling Game',
-      words: []
+
+      name:
+        'New Spelling Game',
+
+      words:
+        []
+
     });
 
 
@@ -1450,14 +2187,21 @@
 
   function deleteGame(index) {
 
-    if (!confirm(
-      'Delete this spelling game?'
-    )) return;
+    if (
+      !confirm(
+        'Delete this spelling game?'
+      )
+    ) return;
 
 
-    games.splice(index, 1);
+    games.splice(
+      index,
+      1
+    );
+
 
     saveGames();
+
 
     renderEditGameList();
   }
@@ -1465,18 +2209,23 @@
 
   function openEditor(index) {
 
-    currentGameIndex = index;
+    currentGameIndex =
+      index;
 
 
     document.getElementById(
       'gameNameInput'
-    ).value =
+    )
+    .value =
       games[index].name;
 
 
     renderWordEditor();
 
-    showScreen('editorScreen');
+
+    showScreen(
+      'editorScreen'
+    );
   }
 
 
@@ -1485,10 +2234,14 @@
     const input =
       document.getElementById(
         'gameNameInput'
-      ).value.trim();
+      )
+      .value
+      .trim();
 
 
-    if (!input) {
+    if (
+      !input
+    ) {
 
       alert(
         'Please enter a game name.'
@@ -1498,7 +2251,9 @@
     }
 
 
-    games[currentGameIndex].name =
+    games[
+      currentGameIndex
+    ].name =
       input;
 
 
@@ -1514,10 +2269,14 @@
   function addWord() {
 
     const game =
-      games[currentGameIndex];
+      games[
+        currentGameIndex
+      ];
 
 
-    if (game.words.length >= 20) {
+    if (
+      game.words.length >= 20
+    ) {
 
       alert(
         'You can add up to 20 words to a game.'
@@ -1529,11 +2288,17 @@
 
     game.words.push({
 
-      word: 'New word',
+      word:
+        'New word',
 
-      correct: [],
+      hint:
+        '',
 
-      extra: []
+      correct:
+        [],
+
+      extra:
+        []
 
     });
 
@@ -1547,10 +2312,14 @@
   }
 
 
-  function renderWordEditor(openIndex = -1) {
+  function renderWordEditor(
+    openIndex = -1
+  ) {
 
     const game =
-      games[currentGameIndex];
+      games[
+        currentGameIndex
+      ];
 
 
     const container =
@@ -1561,12 +2330,15 @@
 
     document.getElementById(
       'wordCountText'
-    ).textContent =
+    )
+    .textContent =
       game.words.length +
       ' / 20 words';
 
 
-    if (game.words.length === 0) {
+    if (
+      game.words.length === 0
+    ) {
 
       container.innerHTML = `
         <div class="card">
@@ -1586,37 +2358,52 @@
 
         <div class="word-box">
 
-          <button class="word-header"
-                  onclick="toggleWord(${wordIndex})">
+          <button
+            class="word-header"
+            onclick="toggleWord(${wordIndex})">
 
             <span>
               ${wordIndex + 1}.
-              ${escapeHtml(word.word)}
+              ${escapeHtml(
+                word.word
+              )}
             </span>
 
             <span id="arrow-${wordIndex}">
-              ${wordIndex === openIndex
-                ? '▲'
-                : '▼'}
+              ${
+                wordIndex === openIndex
+                ?
+                '▲'
+                :
+                '▼'
+              }
             </span>
 
           </button>
 
 
-          <div id="word-detail-${wordIndex}"
-               class="word-detail
-               ${wordIndex === openIndex
-                 ? ''
-                 : 'hidden'}">
+          <div
+            id="word-detail-${wordIndex}"
+            class="word-detail ${
+              wordIndex === openIndex
+              ?
+              ''
+              :
+              'hidden'
+            }">
 
 
             <div class="field">
 
-              <label>Word</label>
+              <label>
+                Word
+              </label>
 
               <input
                 type="text"
-                value="${escapeAttribute(word.word)}"
+                value="${escapeAttribute(
+                  word.word
+                )}"
                 onchange="
                   updateWordText(
                     ${wordIndex},
@@ -1630,15 +2417,36 @@
             <div class="field">
 
               <label>
+                Meaning / Text Hint (optional)
+              </label>
+
+              <textarea
+                placeholder="Add a meaning, clue or sentence if you want."
+                onchange="
+                  updateWordHint(
+                    ${wordIndex},
+                    this.value
+                  )">${escapeHtml(
+                    word.hint || ''
+                  )}</textarea>
+
+            </div>
+
+
+            <div class="field">
+
+              <label>
                 Correct Sound Cards
               </label>
 
               <div>
+
                 ${renderEditableCards(
                   word.correct,
                   wordIndex,
                   'correct'
                 )}
+
               </div>
 
 
@@ -1650,7 +2458,9 @@
 
                 <select
                   id="new-correct-colour-${wordIndex}">
+
                   ${renderColourOptions()}
+
                 </select>
 
                 <button
@@ -1675,11 +2485,13 @@
               </label>
 
               <div>
+
                 ${renderEditableCards(
                   word.extra,
                   wordIndex,
                   'extra'
                 )}
+
               </div>
 
 
@@ -1691,7 +2503,9 @@
 
                 <select
                   id="new-extra-colour-${wordIndex}">
+
                   ${renderColourOptions()}
+
                 </select>
 
                 <button
@@ -1745,7 +2559,9 @@
     type
   ) {
 
-    if (cards.length === 0) {
+    if (
+      cards.length === 0
+    ) {
 
       return `
         <p class="small">
@@ -1761,7 +2577,9 @@
       <div class="card-editor">
 
         <input
-          value="${escapeAttribute(card.text)}"
+          value="${escapeAttribute(
+            card.text
+          )}"
           onchange="
             updateCard(
               ${wordIndex},
@@ -1813,11 +2631,17 @@
 
       <option
         value="${colour}"
-        ${colour === selected
-          ? 'selected'
-          : ''}>
+        ${
+          colour === selected
+          ?
+          'selected'
+          :
+          ''
+        }>
 
-        ${capitalise(colour)}
+        ${capitalise(
+          colour
+        )}
 
       </option>
 
@@ -1848,16 +2672,21 @@
       detail.classList.contains(
         'hidden'
       )
-      ? '▼'
-      : '▲';
+      ?
+      '▼'
+      :
+      '▲';
   }
 
 
   function expandAllWords() {
 
-    games[currentGameIndex]
-      .words
-      .forEach((word, index) => {
+    games[
+      currentGameIndex
+    ]
+    .words
+    .forEach(
+      (word, index) => {
 
         document.getElementById(
           `word-detail-${index}`
@@ -1872,18 +2701,26 @@
           );
 
 
-        if (arrow) {
-          arrow.textContent = '▲';
+        if (
+          arrow
+        ) {
+
+          arrow.textContent =
+            '▲';
         }
-      });
+      }
+    );
   }
 
 
   function collapseAllWords() {
 
-    games[currentGameIndex]
-      .words
-      .forEach((word, index) => {
+    games[
+      currentGameIndex
+    ]
+    .words
+    .forEach(
+      (word, index) => {
 
         document.getElementById(
           `word-detail-${index}`
@@ -1898,10 +2735,15 @@
           );
 
 
-        if (arrow) {
-          arrow.textContent = '▼';
+        if (
+          arrow
+        ) {
+
+          arrow.textContent =
+            '▼';
         }
-      });
+      }
+    );
   }
 
 
@@ -1910,17 +2752,43 @@
     value
   ) {
 
-    games[currentGameIndex]
-      .words[index]
-      .word =
-        value.trim()
-        || 'Untitled word';
+    games[
+      currentGameIndex
+    ]
+    .words[
+      index
+    ]
+    .word =
+      value.trim()
+      ||
+      'Untitled word';
 
 
     saveGames();
 
 
-    renderWordEditor(index);
+    renderWordEditor(
+      index
+    );
+  }
+
+
+  function updateWordHint(
+    index,
+    value
+  ) {
+
+    games[
+      currentGameIndex
+    ]
+    .words[
+      index
+    ]
+    .hint =
+      value.trim();
+
+
+    saveGames();
   }
 
 
@@ -1945,7 +2813,9 @@
       textInput.value.trim();
 
 
-    if (!text) {
+    if (
+      !text
+    ) {
 
       alert(
         'Please type something on the card first.'
@@ -1955,16 +2825,21 @@
     }
 
 
-    games[currentGameIndex]
-      .words[wordIndex][type]
-      .push({
+    games[
+      currentGameIndex
+    ]
+    .words[
+      wordIndex
+    ][type]
+    .push({
 
-        text: text,
+      text:
+        text,
 
-        colour:
-          colourInput.value
+      colour:
+        colourInput.value
 
-      });
+    });
 
 
     saveGames();
@@ -1984,9 +2859,15 @@
     value
   ) {
 
-    games[currentGameIndex]
-      .words[wordIndex][type][cardIndex][field]
-      = value;
+    games[
+      currentGameIndex
+    ]
+    .words[
+      wordIndex
+    ][type][
+      cardIndex
+    ][field] =
+      value;
 
 
     saveGames();
@@ -1999,9 +2880,16 @@
     cardIndex
   ) {
 
-    games[currentGameIndex]
-      .words[wordIndex][type]
-      .splice(cardIndex, 1);
+    games[
+      currentGameIndex
+    ]
+    .words[
+      wordIndex
+    ][type]
+    .splice(
+      cardIndex,
+      1
+    );
 
 
     saveGames();
@@ -2013,16 +2901,25 @@
   }
 
 
-  function deleteWord(index) {
+  function deleteWord(
+    index
+  ) {
 
-    if (!confirm(
-      'Delete this word?'
-    )) return;
+    if (
+      !confirm(
+        'Delete this word?'
+      )
+    ) return;
 
 
-    games[currentGameIndex]
-      .words
-      .splice(index, 1);
+    games[
+      currentGameIndex
+    ]
+    .words
+    .splice(
+      index,
+      1
+    );
 
 
     saveGames();
@@ -2032,11 +2929,11 @@
   }
 
 
-  // -------------------------
   // PREVIEW
-  // -------------------------
 
-  function openPreview(wordIndex) {
+  function openPreview(
+    wordIndex
+  ) {
 
     currentPreviewWordIndex =
       wordIndex;
@@ -2054,7 +2951,9 @@
   function renderPreview() {
 
     const game =
-      games[currentGameIndex];
+      games[
+        currentGameIndex
+      ];
 
 
     const word =
@@ -2063,12 +2962,43 @@
       ];
 
 
-    previewSelected = [];
+    const hintBox =
+      document.getElementById(
+        'previewHint'
+      );
+
+
+    if (
+      word.hint &&
+      word.hint.trim()
+    ) {
+
+      hintBox.textContent =
+        word.hint;
+
+
+      hintBox.classList
+        .remove('hidden');
+
+    } else {
+
+      hintBox.textContent =
+        '';
+
+
+      hintBox.classList
+        .add('hidden');
+    }
+
+
+    previewSelected =
+      [];
 
 
     document.getElementById(
       'previewCounter'
-    ).textContent =
+    )
+    .textContent =
       `Word ${
         currentPreviewWordIndex + 1
       } of ${
@@ -2078,22 +3008,31 @@
 
     document.getElementById(
       'previewAnswer'
-    ).innerHTML = '';
+    )
+    .innerHTML = '';
 
 
     document.getElementById(
       'previewFeedback'
-    ).textContent = '';
+    )
+    .textContent = '';
 
 
     const choices =
       shuffleArray([
+
         ...word.correct.map(
-          card => ({ ...card })
+          card => ({
+            ...card
+          })
         ),
+
         ...word.extra.map(
-          card => ({ ...card })
+          card => ({
+            ...card
+          })
         )
+
       ]);
 
 
@@ -2103,57 +3042,59 @@
       );
 
 
-    container.innerHTML = '';
+    container.innerHTML =
+      '';
 
 
-    choices.forEach(card => {
+    choices.forEach(
+      card => {
 
-      const button =
-        document.createElement(
-          'button'
-        );
-
-
-      button.className =
-        `choice-card sound-card ${card.colour}`;
-
-
-      button.textContent =
-        card.text;
-
-
-      button.addEventListener(
-        'click',
-        () => {
-
-          previewSelected.push({
-
-            text:
-              card.text,
-
-            colour:
-              card.colour,
-
-            sourceButton:
-              button
-
-          });
-
-
-          button.classList.add(
-            'used'
+        const button =
+          document.createElement(
+            'button'
           );
 
 
-          renderPreviewAnswer();
-        }
-      );
+        button.className =
+          `choice-card sound-card ${card.colour}`;
 
 
-      container.appendChild(
-        button
-      );
-    });
+        button.textContent =
+          card.text;
+
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            previewSelected.push({
+
+              text:
+                card.text,
+
+              colour:
+                card.colour,
+
+              sourceButton:
+                button
+
+            });
+
+
+            button.classList
+              .add('used');
+
+
+            renderPreviewAnswer();
+          }
+        );
+
+
+        container.appendChild(
+          button
+        );
+      }
+    );
   }
 
 
@@ -2165,7 +3106,8 @@
       );
 
 
-    container.innerHTML = '';
+    container.innerHTML =
+      '';
 
 
     previewSelected.forEach(
@@ -2208,28 +3150,37 @@
         container.appendChild(
           button
         );
-      });
+      }
+    );
   }
 
 
   function checkPreviewAnswer() {
 
     const word =
-      games[currentGameIndex]
-        .words[
-          currentPreviewWordIndex
-        ];
+      games[
+        currentGameIndex
+      ]
+      .words[
+        currentPreviewWordIndex
+      ];
 
 
     const expected =
       word.correct
-        .map(card => card.text)
+        .map(
+          card =>
+            card.text
+        )
         .join('|');
 
 
     const chosen =
       previewSelected
-        .map(card => card.text)
+        .map(
+          card =>
+            card.text
+        )
         .join('|');
 
 
@@ -2239,7 +3190,9 @@
       );
 
 
-    if (chosen === expected) {
+    if (
+      chosen === expected
+    ) {
 
       feedback.textContent =
         '⭐ You know your words! Great spelling!';
@@ -2268,7 +3221,9 @@
   function nextPreviewWord() {
 
     const game =
-      games[currentGameIndex];
+      games[
+        currentGameIndex
+      ];
 
 
     if (
@@ -2296,19 +3251,22 @@
   }
 
 
-  // -------------------------
   // HELPERS
-  // -------------------------
 
-  function shuffleArray(array) {
+  function shuffleArray(
+    array
+  ) {
 
     const copy =
       [...array];
 
 
     for (
-      let i = copy.length - 1;
+      let i =
+        copy.length - 1;
+
       i > 0;
+
       i--
     ) {
 
@@ -2322,7 +3280,9 @@
       [
         copy[i],
         copy[j]
-      ] = [
+      ]
+      =
+      [
         copy[j],
         copy[i]
       ];
@@ -2333,7 +3293,9 @@
   }
 
 
-  function capitalise(text) {
+  function capitalise(
+    text
+  ) {
 
     return (
       text.charAt(0)
@@ -2344,9 +3306,13 @@
   }
 
 
-  function escapeHtml(text) {
+  function escapeHtml(
+    text
+  ) {
 
-    return String(text)
+    return String(
+      text
+    )
 
       .replaceAll(
         '&',
@@ -2375,8 +3341,13 @@
   }
 
 
-  function escapeAttribute(text) {
-    return escapeHtml(text);
+  function escapeAttribute(
+    text
+  ) {
+
+    return escapeHtml(
+      text
+    );
   }
 
 </script>
