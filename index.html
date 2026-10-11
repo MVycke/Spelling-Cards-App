@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-AU">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -100,12 +101,16 @@
       background: #61c978;
     }
 
+    .practice {
+      background: #c8a7ef;
+    }
+
     .create {
       background: #ffd65a;
     }
 
     .results {
-      background: #c7a7ed;
+      background: #f5a6c8;
     }
 
     .help {
@@ -169,7 +174,7 @@
       border-radius: 20px;
       padding: 22px;
       margin-bottom: 18px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
     }
 
     .row {
@@ -245,7 +250,7 @@
       font-weight: bold;
       text-align: center;
       color: #172033;
-      border: 2px solid rgba(0,0,0,0.06);
+      border: 2px solid rgba(0, 0, 0, 0.06);
     }
 
     .green {
@@ -268,19 +273,12 @@
       background: #c8a7ef;
     }
 
-    /*
-      COLOURED DROPDOWN
-
-      The background colour shows which colour is selected.
-      The text inside shows the custom meaning.
-    */
-
     .colour-select {
       width: 100%;
       min-height: 52px;
       font-weight: bold;
       color: #172033;
-      border: 2px solid rgba(24,49,83,0.22);
+      border: 2px solid rgba(24, 49, 83, 0.22);
       cursor: pointer;
     }
 
@@ -303,11 +301,6 @@
     .colour-select.pink {
       background: #f5a6c8;
     }
-
-    /*
-      Dropdown options themselves are kept simple because
-      browsers display dropdown menus differently.
-    */
 
     .colour-select option {
       background: white;
@@ -554,6 +547,81 @@
       align-items: center;
     }
 
+    /* PRACTICE MODE */
+
+    .practice-slots {
+      min-height: 100px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      margin: 18px 0 28px;
+    }
+
+    .practice-slot {
+      min-width: 100px;
+      min-height: 70px;
+      border-radius: 14px;
+      border: 3px dashed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .practice-slot.green {
+      background: rgba(155, 227, 159, 0.22);
+      border-color: #65ca70;
+    }
+
+    .practice-slot.blue {
+      background: rgba(145, 201, 247, 0.22);
+      border-color: #5baee8;
+    }
+
+    .practice-slot.yellow {
+      background: rgba(255, 228, 122, 0.28);
+      border-color: #d7ba39;
+    }
+
+    .practice-slot.purple {
+      background: rgba(200, 167, 239, 0.22);
+      border-color: #9d70db;
+    }
+
+    .practice-slot.pink {
+      background: rgba(245, 166, 200, 0.22);
+      border-color: #de75a4;
+    }
+
+    .practice-slot.filled {
+      border-style: solid;
+    }
+
+    .practice-slot .sound-card {
+      width: 100%;
+      min-height: 68px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    .practice-navigation {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+
+    .practice-message {
+      min-height: 24px;
+      font-size: 17px;
+      color: #617184;
+      margin-top: 12px;
+    }
+
     @media (max-width: 800px) {
 
       .card-editor,
@@ -576,6 +644,10 @@
 
       button {
         font-size: 18px;
+      }
+
+      .practice-slot {
+        min-width: 85px;
       }
     }
   </style>
@@ -600,6 +672,11 @@
       <button class="play"
               onclick="openPlayList()">
         ▶ Play a Game
+      </button>
+
+      <button class="practice"
+              onclick="openPracticeList()">
+        🧩 Practice Words
       </button>
 
       <button class="create"
@@ -641,6 +718,128 @@
       <h2>My Spelling Games</h2>
 
       <div id="playGameList"></div>
+
+    </div>
+
+  </section>
+
+
+  <!-- PRACTICE LIST -->
+
+  <section id="practiceListScreen"
+           class="screen hidden">
+
+    <div class="content">
+
+      <button class="back"
+              onclick="showScreen('homeScreen')">
+        ← Home
+      </button>
+
+      <h2>Practice Words</h2>
+
+      <p class="small">
+        Choose a spelling game to practise.
+      </p>
+
+      <div id="practiceGameList"></div>
+
+    </div>
+
+  </section>
+
+
+  <!-- PRACTICE WORD -->
+
+  <section id="practiceScreen"
+           class="screen hidden">
+
+    <div class="content">
+
+      <button class="back"
+              onclick="openPracticeList()">
+        ← Practice List
+      </button>
+
+      <div class="card play-area">
+
+        <div id="practiceGameName"
+             class="game-heading"></div>
+
+        <div id="practiceCounter"
+             class="game-counter"></div>
+
+
+        <div class="support-area">
+
+          <img id="practicePicture"
+               class="word-picture hidden"
+               alt="Picture clue">
+
+
+          <div id="practiceAudioBox"
+               class="play-audio-box hidden">
+
+            <button class="audio-play-button"
+                    onclick="playSavedAudio('practiceAudio')">
+              ▶ Play Word
+            </button>
+
+            <audio id="practiceAudio"
+                   class="hidden"></audio>
+
+          </div>
+
+        </div>
+
+
+        <div id="practiceHint"
+             class="word-hint hidden"></div>
+
+
+        <h3>
+          Build the word
+        </h3>
+
+
+        <div id="practiceSlots"
+             class="practice-slots"></div>
+
+
+        <div class="small">
+          Sound cards
+        </div>
+
+        <div id="practiceChoices"
+             class="choice-area"></div>
+
+
+        <div id="practiceMessage"
+             class="practice-message"></div>
+
+
+        <div class="practice-navigation">
+
+          <button id="practicePreviousButton"
+                  class="secondary"
+                  onclick="previousPracticeWord()">
+            ← Previous Word
+          </button>
+
+          <button class="secondary"
+                  onclick="restartPracticeWord()">
+            ↻ Start Again
+          </button>
+
+          <button id="practiceNextButton"
+                  class="preview-button"
+                  onclick="nextPracticeWord()">
+            Next Word →
+          </button>
+
+        </div>
+
+      </div>
 
     </div>
 
@@ -996,28 +1195,28 @@
            class="card">
 
         <div class="help-step">
-          🔊 <strong>1. Listen</strong><br>
+          🧩 <strong>Practice first</strong><br>
+          Choose Practice Words to build your words without being marked.
+        </div>
+
+        <div class="help-step">
+          🔊 <strong>Listen</strong><br>
           Press Play Word if there is a recording.
         </div>
 
         <div class="help-step">
-          👀 <strong>2. Look</strong><br>
+          👀 <strong>Look</strong><br>
           Look at the picture or clue if there is one.
         </div>
 
         <div class="help-step">
-          🔤 <strong>3. Build</strong><br>
+          🔤 <strong>Build</strong><br>
           Choose the sound cards to make your word.
         </div>
 
         <div class="help-step">
-          ✅ <strong>4. Check</strong><br>
-          Press Check when you are finished.
-        </div>
-
-        <div class="help-step">
-          ⭐ <strong>5. Keep going</strong><br>
-          Have another try if you need to.
+          ✅ <strong>Play the game</strong><br>
+          When you are ready, choose Play a Game.
         </div>
 
       </div>
@@ -1052,13 +1251,13 @@
         </div>
 
         <div class="help-step">
-          <strong>6. Preview</strong><br>
-          Test the word as the child will see it.
+          <strong>6. Practice Words</strong><br>
+          Practice mode uses only the correct sound cards and does not record results.
         </div>
 
         <div class="help-step">
-          <strong>7. Save and play</strong><br>
-          Once you are happy with the game, it is ready to use.
+          <strong>7. Play a Game</strong><br>
+          Game mode includes the extra cards and records the result.
         </div>
 
       </div>
@@ -1075,6 +1274,7 @@
   ========================= */
 
   function makeId(prefix) {
+
     return (
       prefix +
       '-' +
@@ -1088,6 +1288,7 @@
 
 
   function capitalise(text) {
+
     return (
       text.charAt(0).toUpperCase()
       +
@@ -1097,6 +1298,7 @@
 
 
   function escapeHtml(text) {
+
     return String(text ?? '')
       .replaceAll('&', '&amp;')
       .replaceAll('<', '&lt;')
@@ -1107,6 +1309,7 @@
 
 
   function escapeAttribute(text) {
+
     return escapeHtml(text);
   }
 
@@ -1114,6 +1317,7 @@
   function shuffleArray(array) {
 
     const copy = [...array];
+
 
     for (
       let i = copy.length - 1;
@@ -1127,6 +1331,7 @@
           (i + 1)
         );
 
+
       [
         copy[i],
         copy[j]
@@ -1137,6 +1342,7 @@
         copy[i]
       ];
     }
+
 
     return copy;
   }
@@ -1391,6 +1597,7 @@
 
 
   function saveImageBlob(wordId, blob) {
+
     return putMediaBlob(
       IMAGE_STORE,
       wordId,
@@ -1400,6 +1607,7 @@
 
 
   function getImageBlob(wordId) {
+
     return getMediaBlob(
       IMAGE_STORE,
       wordId
@@ -1408,6 +1616,7 @@
 
 
   function deleteImageBlob(wordId) {
+
     return deleteMediaBlob(
       IMAGE_STORE,
       wordId
@@ -1416,6 +1625,7 @@
 
 
   function saveAudioBlob(wordId, blob) {
+
     return putMediaBlob(
       AUDIO_STORE,
       wordId,
@@ -1425,6 +1635,7 @@
 
 
   function getAudioBlob(wordId) {
+
     return getMediaBlob(
       AUDIO_STORE,
       wordId
@@ -1433,6 +1644,7 @@
 
 
   function deleteAudioBlob(wordId) {
+
     return deleteMediaBlob(
       AUDIO_STORE,
       wordId
@@ -1490,6 +1702,7 @@
 
 
     if (!element) {
+
       return false;
     }
 
@@ -1513,6 +1726,7 @@
 
 
       if (!blob) {
+
         return false;
       }
 
@@ -1561,6 +1775,7 @@
 
 
     if (!element) {
+
       return false;
     }
 
@@ -1579,6 +1794,7 @@
 
 
       if (!blob) {
+
         return false;
       }
 
@@ -1624,6 +1840,7 @@
       !audio ||
       !audio.src
     ) {
+
       return;
     }
 
@@ -1803,7 +2020,7 @@
   const defaultColourMeanings = {
 
     green:
-      'First letter of the word and syllable',
+      'First letter of a syllable',
 
     blue:
       'Other consonant',
@@ -2133,61 +2350,6 @@
               }
 
             ]
-          },
-
-
-          {
-            id:
-              makeId('word'),
-
-            word:
-              'start',
-
-            hint:
-              '',
-
-            correct: [
-
-              {
-                text:
-                  'st',
-                colour:
-                  'green'
-              },
-
-              {
-                text:
-                  'ar',
-                colour:
-                  'purple'
-              },
-
-              {
-                text:
-                  't',
-                colour:
-                  'pink'
-              }
-
-            ],
-
-            extra: [
-
-              {
-                text:
-                  's',
-                colour:
-                  'green'
-              },
-
-              {
-                text:
-                  'or',
-                colour:
-                  'purple'
-              }
-
-            ]
           }
 
         ]
@@ -2227,6 +2389,7 @@
               'game'
             );
 
+
           changed =
             true;
         }
@@ -2242,6 +2405,7 @@
                   'word'
                 );
 
+
               changed =
                 true;
             }
@@ -2255,6 +2419,7 @@
               word.hint =
                 '';
 
+
               changed =
                 true;
             }
@@ -2265,6 +2430,7 @@
 
 
     if (changed) {
+
       saveGames();
     }
   }
@@ -2278,38 +2444,64 @@
      APP STATE
   ========================= */
 
-  let currentGameIndex = 0;
+  let currentGameIndex =
+    0;
 
-  let currentPreviewWordIndex = 0;
+  let currentPreviewWordIndex =
+    0;
 
-  let previewSelected = [];
+  let previewSelected =
+    [];
 
-  let childWordIndex = 0;
+  let childWordIndex =
+    0;
 
-  let childSelected = [];
+  let childSelected =
+    [];
 
-  let childAttempts = 0;
+  let childAttempts =
+    0;
 
-  let childWordFinished = false;
+  let childWordFinished =
+    false;
 
-  let currentGameResults = [];
+  let currentGameResults =
+    [];
 
 
-  let activeRecorder = null;
+  let practiceGameIndex =
+    0;
 
-  let activeRecordingStream = null;
+  let practiceWordIndex =
+    0;
 
-  let activeRecordingChunks = [];
+  let practiceSelected =
+    [];
 
-  let activeRecordingWordId = null;
+  let practiceAvailableCards =
+    [];
 
-  let activeRecordingWordIndex = null;
 
-  let recordingSeconds = 0;
+  let activeRecorder =
+    null;
 
-  let recordingInterval = null;
+  let activeRecordingStream =
+    null;
 
-  let recordingTimeout = null;
+  let activeRecordingChunks =
+    [];
+
+  let activeRecordingWordId =
+    null;
+
+  let recordingSeconds =
+    0;
+
+  let recordingInterval =
+    null;
+
+  let recordingTimeout =
+    null;
 
 
 
@@ -2507,6 +2699,532 @@
 
 
   /* =========================
+     PRACTICE MODE
+  ========================= */
+
+  function openPracticeList() {
+
+    renderPracticeGameList();
+
+    showScreen(
+      'practiceListScreen'
+    );
+  }
+
+
+  function renderPracticeGameList() {
+
+    const container =
+      document.getElementById(
+        'practiceGameList'
+      );
+
+
+    if (
+      games.length === 0
+    ) {
+
+      container.innerHTML = `
+
+        <div class="card">
+          No spelling games have been created yet.
+        </div>
+
+      `;
+
+      return;
+    }
+
+
+    container.innerHTML =
+      games.map(
+        (game, index) => `
+
+        <div class="card game-row">
+
+          <div>
+
+            <strong>
+              ${escapeHtml(
+                game.name
+              )}
+            </strong>
+
+            <p>
+              ${game.words.length}
+              word${game.words.length === 1 ? '' : 's'}
+            </p>
+
+          </div>
+
+
+          <button
+            class="practice"
+            onclick="startPracticeGame(${index})">
+
+            Practise
+
+          </button>
+
+        </div>
+
+      `
+      ).join('');
+  }
+
+
+  function startPracticeGame(
+    gameIndex
+  ) {
+
+    const game =
+      games[
+        gameIndex
+      ];
+
+
+    if (
+      !game ||
+      game.words.length === 0
+    ) {
+
+      alert(
+        'This game does not have any words yet.'
+      );
+
+      return;
+    }
+
+
+    practiceGameIndex =
+      gameIndex;
+
+
+    practiceWordIndex =
+      0;
+
+
+    renderPracticeWord();
+
+
+    showScreen(
+      'practiceScreen'
+    );
+  }
+
+
+  async function renderPracticeWord() {
+
+    const game =
+      games[
+        practiceGameIndex
+      ];
+
+
+    const word =
+      game.words[
+        practiceWordIndex
+      ];
+
+
+    practiceSelected =
+      new Array(
+        word.correct.length
+      )
+      .fill(
+        null
+      );
+
+
+    practiceAvailableCards =
+      shuffleArray(
+        word.correct.map(
+          card => ({
+
+            text:
+              card.text,
+
+            colour:
+              card.colour
+
+          })
+        )
+      );
+
+
+    document.getElementById(
+      'practiceGameName'
+    )
+    .innerHTML =
+      `<h2>${escapeHtml(
+        game.name
+      )}</h2>`;
+
+
+    document.getElementById(
+      'practiceCounter'
+    )
+    .textContent =
+      `Word ${
+        practiceWordIndex + 1
+      } of ${
+        game.words.length
+      }`;
+
+
+    await displayWordImage(
+      word.id,
+      'practicePicture'
+    );
+
+
+    const hasAudio =
+      await displayWordAudio(
+        word.id,
+        'practiceAudio'
+      );
+
+
+    document.getElementById(
+      'practiceAudioBox'
+    )
+    .classList.toggle(
+      'hidden',
+      !hasAudio
+    );
+
+
+    const hintBox =
+      document.getElementById(
+        'practiceHint'
+      );
+
+
+    if (
+      word.hint &&
+      word.hint.trim()
+    ) {
+
+      hintBox.textContent =
+        word.hint;
+
+
+      hintBox.classList.remove(
+        'hidden'
+      );
+
+    } else {
+
+      hintBox.textContent =
+        '';
+
+
+      hintBox.classList.add(
+        'hidden'
+      );
+    }
+
+
+    document.getElementById(
+      'practiceMessage'
+    )
+    .textContent =
+      '';
+
+
+    renderPracticeSlots();
+
+    renderPracticeChoices();
+
+    updatePracticeNavigation();
+  }
+
+
+  function renderPracticeSlots() {
+
+    const word =
+      games[
+        practiceGameIndex
+      ]
+      .words[
+        practiceWordIndex
+      ];
+
+
+    const container =
+      document.getElementById(
+        'practiceSlots'
+      );
+
+
+    container.innerHTML =
+      '';
+
+
+    word.correct.forEach(
+      (correctCard, slotIndex) => {
+
+        const slot =
+          document.createElement(
+            'div'
+          );
+
+
+        slot.className =
+          `practice-slot ${correctCard.colour}`;
+
+
+        const placedCard =
+          practiceSelected[
+            slotIndex
+          ];
+
+
+        if (
+          placedCard
+        ) {
+
+          slot.classList.add(
+            'filled'
+          );
+
+
+          const card =
+            document.createElement(
+              'div'
+            );
+
+
+          card.className =
+            `sound-card ${placedCard.colour}`;
+
+
+          card.textContent =
+            placedCard.text;
+
+
+          slot.appendChild(
+            card
+          );
+
+
+          slot.addEventListener(
+            'click',
+            () => {
+
+              removePracticeCard(
+                slotIndex
+              );
+            }
+          );
+        }
+
+
+        container.appendChild(
+          slot
+        );
+      }
+    );
+  }
+
+
+  function renderPracticeChoices() {
+
+    const container =
+      document.getElementById(
+        'practiceChoices'
+      );
+
+
+    container.innerHTML =
+      '';
+
+
+    practiceAvailableCards.forEach(
+      (card, cardIndex) => {
+
+        const button =
+          document.createElement(
+            'button'
+          );
+
+
+        button.className =
+          `choice-card sound-card ${card.colour}`;
+
+
+        button.textContent =
+          card.text;
+
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            placePracticeCard(
+              cardIndex
+            );
+          }
+        );
+
+
+        container.appendChild(
+          button
+        );
+      }
+    );
+  }
+
+
+  function placePracticeCard(
+    availableIndex
+  ) {
+
+    const emptySlot =
+      practiceSelected.findIndex(
+        card =>
+          card === null
+      );
+
+
+    if (
+      emptySlot === -1
+    ) {
+
+      return;
+    }
+
+
+    const card =
+      practiceAvailableCards[
+        availableIndex
+      ];
+
+
+    practiceSelected[
+      emptySlot
+    ] =
+      card;
+
+
+    practiceAvailableCards.splice(
+      availableIndex,
+      1
+    );
+
+
+    renderPracticeSlots();
+
+    renderPracticeChoices();
+  }
+
+
+  function removePracticeCard(
+    slotIndex
+  ) {
+
+    const card =
+      practiceSelected[
+        slotIndex
+      ];
+
+
+    if (
+      !card
+    ) {
+
+      return;
+    }
+
+
+    practiceSelected[
+      slotIndex
+    ] =
+      null;
+
+
+    practiceAvailableCards.push(
+      card
+    );
+
+
+    renderPracticeSlots();
+
+    renderPracticeChoices();
+  }
+
+
+  function restartPracticeWord() {
+
+    renderPracticeWord();
+  }
+
+
+  function previousPracticeWord() {
+
+    if (
+      practiceWordIndex > 0
+    ) {
+
+      practiceWordIndex--;
+
+      renderPracticeWord();
+    }
+  }
+
+
+  function nextPracticeWord() {
+
+    const game =
+      games[
+        practiceGameIndex
+      ];
+
+
+    if (
+      practiceWordIndex <
+      game.words.length - 1
+    ) {
+
+      practiceWordIndex++;
+
+      renderPracticeWord();
+    }
+  }
+
+
+  function updatePracticeNavigation() {
+
+    const game =
+      games[
+        practiceGameIndex
+      ];
+
+
+    const previousButton =
+      document.getElementById(
+        'practicePreviousButton'
+      );
+
+
+    const nextButton =
+      document.getElementById(
+        'practiceNextButton'
+      );
+
+
+    previousButton.disabled =
+      practiceWordIndex === 0;
+
+
+    nextButton.disabled =
+      practiceWordIndex ===
+      game.words.length - 1;
+  }
+
+
+
+  /* =========================
      CHILD PLAY
   ========================= */
 
@@ -2564,11 +3282,16 @@
       ];
 
 
-    childSelected = [];
+    childSelected =
+      [];
 
-    childAttempts = 0;
 
-    childWordFinished = false;
+    childAttempts =
+      0;
+
+
+    childWordFinished =
+      false;
 
 
     document.getElementById(
@@ -2741,6 +3464,7 @@
             if (
               childWordFinished
             ) {
+
               return;
             }
 
@@ -2813,6 +3537,7 @@
             if (
               childWordFinished
             ) {
+
               return;
             }
 
@@ -2847,6 +3572,7 @@
     if (
       childWordFinished
     ) {
+
       return;
     }
 
@@ -2889,7 +3615,8 @@
     ) {
 
       const tries =
-        childAttempts + 1;
+        childAttempts +
+        1;
 
 
       feedback.textContent =
@@ -3222,11 +3949,13 @@
         <table class="result-table">
 
           <thead>
+
             <tr>
               <th>Word</th>
               <th>Result</th>
               <th>Tries</th>
             </tr>
+
           </thead>
 
 
@@ -3472,6 +4201,7 @@
         'Delete this spelling game?'
       )
     ) {
+
       return;
     }
 
@@ -4347,6 +5077,7 @@
 
 
     if (!items) {
+
       return;
     }
 
@@ -4392,6 +5123,7 @@
   ) {
 
     if (!file) {
+
       return;
     }
 
@@ -4588,17 +5320,18 @@
       activeRecorder =
         recorder;
 
+
       activeRecordingStream =
         stream;
+
 
       activeRecordingChunks =
         [];
 
+
       activeRecordingWordId =
         wordId;
 
-      activeRecordingWordIndex =
-        wordIndex;
 
       recordingSeconds =
         0;
@@ -4623,12 +5356,14 @@
 
 
       if (recordButton) {
+
         recordButton.disabled =
           true;
       }
 
 
       if (stopButton) {
+
         stopButton.disabled =
           false;
       }
@@ -4723,13 +5458,12 @@
           activeRecorder =
             null;
 
+
           activeRecordingChunks =
             [];
 
-          activeRecordingWordId =
-            null;
 
-          activeRecordingWordIndex =
+          activeRecordingWordId =
             null;
 
 
@@ -4819,6 +5553,7 @@
         recordingInterval
       );
 
+
       recordingInterval =
         null;
     }
@@ -4829,6 +5564,7 @@
       clearTimeout(
         recordingTimeout
       );
+
 
       recordingTimeout =
         null;
@@ -4881,7 +5617,7 @@
 
 
   /* =========================
-     WORD/CARD EDITING
+     WORD / CARD EDITING
   ========================= */
 
   function toggleWord(
@@ -5171,6 +5907,7 @@
         'Delete this word?'
       )
     ) {
+
       return;
     }
 
