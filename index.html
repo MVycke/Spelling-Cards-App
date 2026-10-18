@@ -548,37 +548,65 @@
     }
 
 
-    /* =========================
+    /* ==================================
        PRACTICE MODE
-    ========================= */
+    ================================== */
 
     .practice-row-wrap {
       width: 100%;
       overflow: hidden;
     }
 
-    .practice-slots {
+
+    /*
+      IMPORTANT:
+      Both rows use flex with nowrap.
+      They can never move onto a second row.
+    */
+
+    .practice-slots,
+    .practice-choice-area {
       width: 100%;
 
-      display: grid;
+      display: flex;
 
-      grid-template-columns:
-        repeat(
-          var(--practice-card-count, 1),
-          minmax(0, 1fr)
-        );
+      flex-direction: row;
 
-      gap: clamp(3px, 0.7vw, 10px);
+      flex-wrap: nowrap !important;
 
+      align-items: stretch;
+
+      justify-content: stretch;
+
+      gap: clamp(2px, 0.6vw, 10px);
+    }
+
+
+    .practice-slots {
       margin: 18px 0 28px;
     }
 
+
+    .practice-choice-area {
+      margin: 22px 0;
+    }
+
+
+    /*
+      Every shadow space receives an equal share
+      of the available width.
+    */
+
     .practice-slot {
+      flex: 1 1 0;
+
+      width: 0;
+
       min-width: 0;
 
-      min-height: clamp(54px, 7vw, 74px);
+      min-height: 72px;
 
-      border-radius: clamp(7px, 1.2vw, 14px);
+      border-radius: clamp(6px, 1vw, 14px);
 
       border: 3px dashed;
 
@@ -592,6 +620,7 @@
 
       overflow: hidden;
     }
+
 
     .practice-slot.green {
       background: rgba(155, 227, 159, 0.22);
@@ -618,30 +647,56 @@
       border-color: #de75a4;
     }
 
+
     .practice-slot.filled {
       border-style: solid;
     }
 
+
+    /*
+      Practice cards override the normal .sound-card
+      minimum width.
+
+      white-space: nowrap means that:
+      "clo" can NEVER become
+      "cl"
+      "o"
+    */
+
+    .practice-choice-area .sound-card,
     .practice-slot .sound-card {
+
+      flex: 1 1 0;
+
       width: 100%;
-      min-width: 0;
-      min-height: 100%;
 
-      padding: 6px 3px;
+      min-width: 0 !important;
 
-      border-radius: clamp(6px, 1vw, 11px);
+      max-width: 100%;
 
-      border: none;
+      min-height: 72px;
 
-      font-size: var(--practice-font-size, 22px);
+      margin: 0;
 
-      white-space: nowrap;
+      padding: 6px 2px;
+
+      border-radius: clamp(6px, 1vw, 12px);
+
+      font-size: 22px;
+
+      line-height: 1;
+
+      white-space: nowrap !important;
+
+      word-break: keep-all !important;
+
+      overflow-wrap: normal !important;
+
+      hyphens: none !important;
 
       overflow: hidden;
 
       text-overflow: clip;
-
-      line-height: 1;
 
       display: flex;
 
@@ -650,48 +705,44 @@
       justify-content: center;
     }
 
-    .practice-choice-area {
-      width: 100%;
 
-      display: grid;
-
-      grid-template-columns:
-        repeat(
-          var(--practice-card-count, 1),
-          minmax(0, 1fr)
-        );
-
-      gap: clamp(3px, 0.7vw, 10px);
-
-      margin: 22px 0;
-    }
+    /*
+      Cards waiting in the pile also share
+      the available space equally.
+    */
 
     .practice-choice-area .sound-card {
-      width: 100%;
-      min-width: 0;
+      flex: 1 1 0;
 
-      min-height: clamp(54px, 7vw, 74px);
+      width: 0;
 
-      padding: 6px 3px;
+      min-width: 0 !important;
+    }
 
-      border-radius: clamp(7px, 1.2vw, 12px);
 
-      font-size: var(--practice-font-size, 22px);
+    /*
+      The letters themselves live inside their own span.
+      This gives JavaScript something accurate to measure.
+    */
 
-      white-space: nowrap;
+    .practice-card-text {
+      display: inline-block;
 
-      overflow: hidden;
+      width: max-content;
 
-      text-overflow: clip;
+      max-width: none;
+
+      white-space: nowrap !important;
+
+      word-break: keep-all !important;
+
+      overflow-wrap: normal !important;
+
+      hyphens: none !important;
 
       line-height: 1;
-
-      display: flex;
-
-      align-items: center;
-
-      justify-content: center;
     }
+
 
     .practice-navigation {
       display: flex;
@@ -701,6 +752,7 @@
       margin-top: 28px;
     }
 
+
     .practice-message {
       min-height: 28px;
       font-size: 18px;
@@ -709,14 +761,17 @@
       margin-top: 10px;
     }
 
+
     .practice-wrong {
       animation: practiceShake 0.42s ease;
       outline: 3px solid #e07a7a;
     }
 
+
     .practice-slot-wrong {
       animation: slotWrongFlash 0.42s ease;
     }
+
 
     @keyframes practiceShake {
 
@@ -744,6 +799,7 @@
         transform: translateX(0);
       }
     }
+
 
     @keyframes slotWrongFlash {
 
@@ -789,6 +845,11 @@
 
       button {
         font-size: 18px;
+      }
+
+      .practice-slot,
+      .practice-choice-area .sound-card {
+        min-height: 60px;
       }
     }
   </style>
@@ -1424,9 +1485,9 @@
 
 <script>
 
-  /* =========================
+  /* ==================================
      BASIC HELPERS
-  ========================= */
+  ================================== */
 
   function makeId(prefix) {
 
@@ -1471,8 +1532,7 @@
 
   function shuffleArray(array) {
 
-    const copy =
-      [...array];
+    const copy = [...array];
 
 
     for (
@@ -1505,9 +1565,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      MEDIA DATABASE
-  ========================= */
+  ================================== */
 
   const MEDIA_DB_NAME =
     'SpellingCardsMedia';
@@ -1623,7 +1683,6 @@
                 function() {
 
                   db.close();
-
                   resolve();
                 };
 
@@ -1733,7 +1792,6 @@
                 function() {
 
                   db.close();
-
                   resolve();
                 };
 
@@ -1825,9 +1883,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      MEDIA DISPLAY
-  ========================= */
+  ================================== */
 
   const mediaObjectUrls =
     new Map();
@@ -1874,7 +1932,6 @@
 
 
     if (!element) {
-
       return false;
     }
 
@@ -1898,7 +1955,6 @@
 
 
       if (!blob) {
-
         return false;
       }
 
@@ -1928,10 +1984,7 @@
 
     } catch (error) {
 
-      console.error(
-        error
-      );
-
+      console.error(error);
 
       return false;
     }
@@ -1950,7 +2003,6 @@
 
 
     if (!element) {
-
       return false;
     }
 
@@ -1969,7 +2021,6 @@
 
 
       if (!blob) {
-
         return false;
       }
 
@@ -1994,10 +2045,7 @@
 
     } catch (error) {
 
-      console.error(
-        error
-      );
-
+      console.error(error);
 
       return false;
     }
@@ -2029,20 +2077,16 @@
 
     audio.play()
       .catch(
-        error => {
-
-          console.error(
-            error
-          );
-        }
+        error =>
+          console.error(error)
       );
   }
 
 
 
-  /* =========================
+  /* ==================================
      IMAGE RESIZING
-  ========================= */
+  ================================== */
 
   function resizeImageFile(file) {
 
@@ -2110,7 +2154,6 @@
                 canvas.width =
                   width;
 
-
                 canvas.height =
                   height;
 
@@ -2135,9 +2178,7 @@
 
                     if (blob) {
 
-                      resolve(
-                        blob
-                      );
+                      resolve(blob);
 
                     } else {
 
@@ -2189,9 +2230,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      COLOUR SETTINGS
-  ========================= */
+  ================================== */
 
   const colourOptions = [
     'green',
@@ -2388,9 +2429,7 @@
           }>
 
           ${escapeHtml(
-            colourLabel(
-              colour
-            )
+            colourLabel(colour)
           )}
 
         </option>
@@ -2421,9 +2460,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      SAVED GAMES
-  ========================= */
+  ================================== */
 
   let games =
     JSON.parse(
@@ -2439,9 +2478,7 @@
 
       {
         id:
-          makeId(
-            'game'
-          ),
+          makeId('game'),
 
         name:
           'Week 1 – ar sound',
@@ -2450,9 +2487,7 @@
 
           {
             id:
-              makeId(
-                'word'
-              ),
+              makeId('word'),
 
             word:
               'car',
@@ -2581,9 +2616,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      APP STATE
-  ========================= */
+  ================================== */
 
   let currentGameIndex =
     0;
@@ -2646,9 +2681,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      NAVIGATION
-  ========================= */
+  ================================== */
 
   function showScreen(
     screenId
@@ -2683,9 +2718,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      HELP
-  ========================= */
+  ================================== */
 
   function openHelp() {
 
@@ -2769,9 +2804,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      PLAY LIST
-  ========================= */
+  ================================== */
 
   function openPlayList() {
 
@@ -2843,9 +2878,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      PRACTICE MODE
-  ========================= */
+  ================================== */
 
   function openPracticeList() {
 
@@ -2954,12 +2989,12 @@
       0;
 
 
-    renderPracticeWord();
-
-
     showScreen(
       'practiceScreen'
     );
+
+
+    renderPracticeWord();
   }
 
 
@@ -3085,11 +3120,6 @@
       '';
 
 
-    setPracticeCardCount(
-      word.correct.length
-    );
-
-
     renderPracticeSlots();
 
 
@@ -3099,157 +3129,7 @@
     updatePracticeNavigation();
 
 
-    requestAnimationFrame(
-      fitPracticeCardText
-    );
-  }
-
-
-  function setPracticeCardCount(
-    count
-  ) {
-
-    const safeCount =
-      Math.max(
-        count,
-        1
-      );
-
-
-    let startingFont =
-      22;
-
-
-    if (
-      safeCount >=
-      8
-    ) {
-
-      startingFont =
-        18;
-    }
-
-
-    if (
-      safeCount >=
-      11
-    ) {
-
-      startingFont =
-        16;
-    }
-
-
-    if (
-      safeCount >=
-      14
-    ) {
-
-      startingFont =
-        14;
-    }
-
-
-    if (
-      safeCount >=
-      17
-    ) {
-
-      startingFont =
-        12;
-    }
-
-
-    const slots =
-      document.getElementById(
-        'practiceSlots'
-      );
-
-
-    const choices =
-      document.getElementById(
-        'practiceChoices'
-      );
-
-
-    if (slots) {
-
-      slots.style.setProperty(
-        '--practice-card-count',
-        safeCount
-      );
-
-
-      slots.style.setProperty(
-        '--practice-font-size',
-        `${startingFont}px`
-      );
-    }
-
-
-    if (choices) {
-
-      choices.style.setProperty(
-        '--practice-card-count',
-        safeCount
-      );
-
-
-      choices.style.setProperty(
-        '--practice-font-size',
-        `${startingFont}px`
-      );
-    }
-  }
-
-
-  function fitPracticeCardText() {
-
-    const cards =
-      document.querySelectorAll(
-        '#practiceSlots .sound-card, #practiceChoices .sound-card'
-      );
-
-
-    cards.forEach(
-      card => {
-
-        let size =
-          parseFloat(
-            window
-              .getComputedStyle(
-                card
-              )
-              .fontSize
-          );
-
-
-        const minimumSize =
-          8;
-
-
-        while (
-          size >
-            minimumSize
-          &&
-          (
-            card.scrollWidth >
-              card.clientWidth
-            ||
-            card.scrollHeight >
-              card.clientHeight
-          )
-        ) {
-
-          size -=
-            1;
-
-
-          card.style.fontSize =
-            `${size}px`;
-        }
-      }
-    );
+    schedulePracticeTextFit();
   }
 
 
@@ -3344,8 +3224,23 @@
             `sound-card ${placedCard.colour}`;
 
 
-          card.textContent =
+          const textSpan =
+            document.createElement(
+              'span'
+            );
+
+
+          textSpan.className =
+            'practice-card-text';
+
+
+          textSpan.textContent =
             placedCard.text;
+
+
+          card.appendChild(
+            textSpan
+          );
 
 
           slot.appendChild(
@@ -3372,9 +3267,7 @@
     );
 
 
-    requestAnimationFrame(
-      fitPracticeCardText
-    );
+    schedulePracticeTextFit();
   }
 
 
@@ -3403,8 +3296,23 @@
           `sound-card ${card.colour}`;
 
 
-        button.textContent =
+        const textSpan =
+          document.createElement(
+            'span'
+          );
+
+
+        textSpan.className =
+          'practice-card-text';
+
+
+        textSpan.textContent =
           card.text;
+
+
+        button.appendChild(
+          textSpan
+        );
 
 
         button.addEventListener(
@@ -3426,8 +3334,185 @@
     );
 
 
+    schedulePracticeTextFit();
+  }
+
+
+  function getPracticeStartingFontSize() {
+
+    const word =
+      games[
+        practiceGameIndex
+      ]
+      ?.words[
+        practiceWordIndex
+      ];
+
+
+    const count =
+      word?.correct?.length ||
+      1;
+
+
+    if (
+      count >=
+      18
+    ) {
+
+      return 11;
+    }
+
+
+    if (
+      count >=
+      15
+    ) {
+
+      return 13;
+    }
+
+
+    if (
+      count >=
+      12
+    ) {
+
+      return 15;
+    }
+
+
+    if (
+      count >=
+      9
+    ) {
+
+      return 17;
+    }
+
+
+    if (
+      count >=
+      6
+    ) {
+
+      return 19;
+    }
+
+
+    return 22;
+  }
+
+
+  function fitOnePracticeCard(
+    card
+  ) {
+
+    if (
+      !card
+    ) {
+
+      return;
+    }
+
+
+    const text =
+      card.querySelector(
+        '.practice-card-text'
+      );
+
+
+    if (
+      !text
+    ) {
+
+      return;
+    }
+
+
+    let fontSize =
+      getPracticeStartingFontSize();
+
+
+    const minimumFontSize =
+      8;
+
+
+    card.style.fontSize =
+      `${fontSize}px`;
+
+
+    text.style.fontSize =
+      `${fontSize}px`;
+
+
+    text.style.whiteSpace =
+      'nowrap';
+
+
+    /*
+      Allow a few pixels inside the card
+      so the letters do not touch the edge.
+    */
+
+    const availableWidth =
+      Math.max(
+        card.clientWidth -
+        8,
+        1
+      );
+
+
+    while (
+      fontSize >
+        minimumFontSize
+      &&
+      text.scrollWidth >
+        availableWidth
+    ) {
+
+      fontSize -=
+        1;
+
+
+      card.style.fontSize =
+        `${fontSize}px`;
+
+
+      text.style.fontSize =
+        `${fontSize}px`;
+    }
+  }
+
+
+  function fitPracticeCardText() {
+
+    document
+      .querySelectorAll(
+        '#practiceSlots .sound-card, #practiceChoices .sound-card'
+      )
+      .forEach(
+        card => {
+
+          fitOnePracticeCard(
+            card
+          );
+        }
+      );
+  }
+
+
+  function schedulePracticeTextFit() {
+
     requestAnimationFrame(
-      fitPracticeCardText
+      () => {
+
+        requestAnimationFrame(
+          () => {
+
+            fitPracticeCardText();
+          }
+        );
+      }
     );
   }
 
@@ -3738,9 +3823,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      CHILD PLAY
-  ========================= */
+  ================================== */
 
   function startChildGame(
     gameIndex
@@ -4342,9 +4427,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      RESULTS
-  ========================= */
+  ================================== */
 
   function saveCurrentResults() {
 
@@ -4592,9 +4677,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      CREATE LIST
-  ========================= */
+  ================================== */
 
   function openCreateList() {
 
@@ -4782,9 +4867,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      GAME EDITOR
-  ========================= */
+  ================================== */
 
   function openEditor(
     index
@@ -5465,9 +5550,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      EDITOR MEDIA
-  ========================= */
+  ================================== */
 
   async function loadEditorMedia() {
 
@@ -5545,9 +5630,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      PICTURES
-  ========================= */
+  ================================== */
 
   function handlePictureDragOver(
     event
@@ -5753,9 +5838,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      AUDIO RECORDING
-  ========================= */
+  ================================== */
 
   function chooseRecordingMimeType() {
 
@@ -6180,9 +6265,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      WORD / CARD EDITING
-  ========================= */
+  ================================== */
 
   function toggleWord(
     index
@@ -6523,9 +6608,9 @@
 
 
 
-  /* =========================
+  /* ==================================
      PREVIEW
-  ========================= */
+  ================================== */
 
   function openPreview(
     wordIndex
@@ -6882,28 +6967,28 @@
 
 
   /*
-    Re-check Practice card text if the window size changes.
-    This helps when rotating a tablet or resizing the browser.
+    Refit the Practice cards when the browser
+    changes size or a tablet rotates.
   */
 
   window.addEventListener(
     'resize',
     function() {
 
+      const screen =
+        document.getElementById(
+          'practiceScreen'
+        );
+
+
       if (
-        !document
-          .getElementById(
-            'practiceScreen'
-          )
-          .classList
-          .contains(
-            'hidden'
-          )
+        screen &&
+        !screen.classList.contains(
+          'hidden'
+        )
       ) {
 
-        renderPracticeSlots();
-
-        renderPracticeChoices();
+        schedulePracticeTextFit();
       }
     }
   );
