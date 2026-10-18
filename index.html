@@ -547,28 +547,38 @@
       align-items: center;
     }
 
-    /* PRACTICE MODE */
+
+    /* =========================
+       PRACTICE MODE
+    ========================= */
+
+    .practice-row-wrap {
+      width: 100%;
+      overflow: hidden;
+    }
 
     .practice-slots {
-      min-height: 100px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      justify-content: center;
+      width: 100%;
+      display: grid;
+      grid-template-columns:
+        repeat(
+          var(--practice-card-count, 1),
+          minmax(0, 1fr)
+        );
+      gap: clamp(4px, 1.2vw, 12px);
       margin: 18px 0 28px;
     }
 
     .practice-slot {
-      min-width: 100px;
-      min-height: 70px;
+      min-width: 0;
+      min-height: clamp(56px, 8vw, 74px);
       border-radius: 14px;
       border: 3px dashed;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      padding: 0;
+      overflow: hidden;
     }
 
     .practice-slot.green {
@@ -602,9 +612,40 @@
 
     .practice-slot .sound-card {
       width: 100%;
-      min-height: 68px;
+      min-width: 0;
+      min-height: 100%;
+      padding:
+        clamp(7px, 1.4vw, 14px)
+        clamp(4px, 1vw, 12px);
       border-radius: 10px;
       border: none;
+      font-size:
+        clamp(14px, 2.6vw, 22px);
+      overflow-wrap: anywhere;
+    }
+
+    .practice-choice-area {
+      width: 100%;
+      display: grid;
+      grid-template-columns:
+        repeat(
+          var(--practice-card-count, 1),
+          minmax(0, 1fr)
+        );
+      gap: clamp(4px, 1.2vw, 12px);
+      margin: 22px 0;
+    }
+
+    .practice-choice-area .sound-card {
+      width: 100%;
+      min-width: 0;
+      min-height: clamp(56px, 8vw, 74px);
+      padding:
+        clamp(7px, 1.4vw, 14px)
+        clamp(4px, 1vw, 12px);
+      font-size:
+        clamp(14px, 2.6vw, 22px);
+      overflow-wrap: anywhere;
     }
 
     .practice-navigation {
@@ -616,11 +657,66 @@
     }
 
     .practice-message {
-      min-height: 24px;
-      font-size: 17px;
+      min-height: 28px;
+      font-size: 18px;
+      font-weight: bold;
       color: #617184;
-      margin-top: 12px;
+      margin-top: 10px;
     }
+
+    .practice-wrong {
+      animation:
+        practiceShake 0.42s ease;
+      outline: 3px solid #e07a7a;
+    }
+
+    .practice-slot-wrong {
+      animation:
+        slotWrongFlash 0.42s ease;
+    }
+
+    @keyframes practiceShake {
+
+      0% {
+        transform: translateX(0);
+      }
+
+      20% {
+        transform: translateX(-8px);
+      }
+
+      40% {
+        transform: translateX(8px);
+      }
+
+      60% {
+        transform: translateX(-6px);
+      }
+
+      80% {
+        transform: translateX(6px);
+      }
+
+      100% {
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slotWrongFlash {
+
+      0% {
+        box-shadow: 0 0 0 0 rgba(220, 80, 80, 0);
+      }
+
+      50% {
+        box-shadow: 0 0 0 5px rgba(220, 80, 80, 0.28);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(220, 80, 80, 0);
+      }
+    }
+
 
     @media (max-width: 800px) {
 
@@ -644,10 +740,6 @@
 
       button {
         font-size: 18px;
-      }
-
-      .practice-slot {
-        min-width: 85px;
       }
     }
   </style>
@@ -801,17 +893,25 @@
           Build the word
         </h3>
 
+        <div class="practice-row-wrap">
 
-        <div id="practiceSlots"
-             class="practice-slots"></div>
+          <div id="practiceSlots"
+               class="practice-slots"></div>
+
+        </div>
 
 
         <div class="small">
           Sound cards
         </div>
 
-        <div id="practiceChoices"
-             class="choice-area"></div>
+
+        <div class="practice-row-wrap">
+
+          <div id="practiceChoices"
+               class="practice-choice-area"></div>
+
+        </div>
 
 
         <div id="practiceMessage"
@@ -1196,7 +1296,7 @@
 
         <div class="help-step">
           🧩 <strong>Practice first</strong><br>
-          Choose Practice Words to build your words without being marked.
+          Choose Practice Words to practise without a score.
         </div>
 
         <div class="help-step">
@@ -1211,7 +1311,12 @@
 
         <div class="help-step">
           🔤 <strong>Build</strong><br>
-          Choose the sound cards to make your word.
+          Choose the sound card that belongs in the next space.
+        </div>
+
+        <div class="help-step">
+          ↩️ <strong>Try another card</strong><br>
+          If a card does not belong there, it will stay in the pile.
         </div>
 
         <div class="help-step">
@@ -1252,12 +1357,12 @@
 
         <div class="help-step">
           <strong>6. Practice Words</strong><br>
-          Practice mode uses only the correct sound cards and does not record results.
+          Practice mode uses only the correct cards. A card only stays if it belongs in that position.
         </div>
 
         <div class="help-step">
           <strong>7. Play a Game</strong><br>
-          Game mode includes the extra cards and records the result.
+          Game mode includes extra cards and records the result.
         </div>
 
       </div>
@@ -1316,7 +1421,8 @@
 
   function shuffleArray(array) {
 
-    const copy = [...array];
+    const copy =
+      [...array];
 
 
     for (
@@ -1467,6 +1573,7 @@
                 function() {
 
                   db.close();
+
                   resolve();
                 };
 
@@ -1576,6 +1683,7 @@
                 function() {
 
                   db.close();
+
                   resolve();
                 };
 
@@ -1596,7 +1704,10 @@
   }
 
 
-  function saveImageBlob(wordId, blob) {
+  function saveImageBlob(
+    wordId,
+    blob
+  ) {
 
     return putMediaBlob(
       IMAGE_STORE,
@@ -1606,7 +1717,9 @@
   }
 
 
-  function getImageBlob(wordId) {
+  function getImageBlob(
+    wordId
+  ) {
 
     return getMediaBlob(
       IMAGE_STORE,
@@ -1615,7 +1728,9 @@
   }
 
 
-  function deleteImageBlob(wordId) {
+  function deleteImageBlob(
+    wordId
+  ) {
 
     return deleteMediaBlob(
       IMAGE_STORE,
@@ -1624,7 +1739,10 @@
   }
 
 
-  function saveAudioBlob(wordId, blob) {
+  function saveAudioBlob(
+    wordId,
+    blob
+  ) {
 
     return putMediaBlob(
       AUDIO_STORE,
@@ -1634,7 +1752,9 @@
   }
 
 
-  function getAudioBlob(wordId) {
+  function getAudioBlob(
+    wordId
+  ) {
 
     return getMediaBlob(
       AUDIO_STORE,
@@ -1643,7 +1763,9 @@
   }
 
 
-  function deleteAudioBlob(wordId) {
+  function deleteAudioBlob(
+    wordId
+  ) {
 
     return deleteMediaBlob(
       AUDIO_STORE,
@@ -1756,7 +1878,10 @@
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
+
 
       return false;
     }
@@ -1819,7 +1944,10 @@
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
+
 
       return false;
     }
@@ -1851,8 +1979,12 @@
 
     audio.play()
       .catch(
-        error =>
-          console.error(error)
+        error => {
+
+          console.error(
+            error
+          );
+        }
       );
   }
 
@@ -1928,6 +2060,7 @@
                 canvas.width =
                   width;
 
+
                 canvas.height =
                   height;
 
@@ -1952,7 +2085,9 @@
 
                     if (blob) {
 
-                      resolve(blob);
+                      resolve(
+                        blob
+                      );
 
                     } else {
 
@@ -2067,7 +2202,9 @@
   }
 
 
-  function colourLabel(colour) {
+  function colourLabel(
+    colour
+  ) {
 
     const meaning =
       colourMeanings[
@@ -2201,7 +2338,9 @@
           }>
 
           ${escapeHtml(
-            colourLabel(colour)
+            colourLabel(
+              colour
+            )
           )}
 
         </option>
@@ -2250,7 +2389,9 @@
 
       {
         id:
-          makeId('game'),
+          makeId(
+            'game'
+          ),
 
         name:
           'Week 1 – ar sound',
@@ -2259,7 +2400,9 @@
 
           {
             id:
-              makeId('word'),
+              makeId(
+                'word'
+              ),
 
             word:
               'car',
@@ -2272,6 +2415,7 @@
               {
                 text:
                   'c',
+
                 colour:
                   'green'
               },
@@ -2279,6 +2423,7 @@
               {
                 text:
                   'ar',
+
                 colour:
                   'purple'
               }
@@ -2290,6 +2435,7 @@
               {
                 text:
                   'or',
+
                 colour:
                   'purple'
               }
@@ -2300,7 +2446,9 @@
 
           {
             id:
-              makeId('word'),
+              makeId(
+                'word'
+              ),
 
             word:
               'farm',
@@ -2313,6 +2461,7 @@
               {
                 text:
                   'f',
+
                 colour:
                   'green'
               },
@@ -2320,6 +2469,7 @@
               {
                 text:
                   'ar',
+
                 colour:
                   'purple'
               },
@@ -2327,6 +2477,7 @@
               {
                 text:
                   'm',
+
                 colour:
                   'pink'
               }
@@ -2338,6 +2489,7 @@
               {
                 text:
                   'b',
+
                 colour:
                   'green'
               },
@@ -2345,6 +2497,7 @@
               {
                 text:
                   'a',
+
                 colour:
                   'purple'
               }
@@ -2552,6 +2705,7 @@
       'helpScreen'
     );
 
+
     showChildHelp();
   }
 
@@ -2635,6 +2789,7 @@
 
     renderPlayGameList();
 
+
     showScreen(
       'playScreen'
     );
@@ -2650,11 +2805,13 @@
 
 
     if (
-      games.length === 0
+      games.length ===
+      0
     ) {
 
       container.innerHTML =
         '<div class="card">No spelling games have been created yet.</div>';
+
 
       return;
     }
@@ -2706,6 +2863,7 @@
 
     renderPracticeGameList();
 
+
     showScreen(
       'practiceListScreen'
     );
@@ -2721,7 +2879,8 @@
 
 
     if (
-      games.length === 0
+      games.length ===
+      0
     ) {
 
       container.innerHTML = `
@@ -2731,6 +2890,7 @@
         </div>
 
       `;
+
 
       return;
     }
@@ -2785,12 +2945,14 @@
 
     if (
       !game ||
-      game.words.length === 0
+      game.words.length ===
+      0
     ) {
 
       alert(
         'This game does not have any words yet.'
       );
+
 
       return;
     }
@@ -2839,13 +3001,16 @@
     practiceAvailableCards =
       shuffleArray(
         word.correct.map(
-          card => ({
+          (card, index) => ({
 
             text:
               card.text,
 
             colour:
-              card.colour
+              card.colour,
+
+            originalIndex:
+              index
 
           })
         )
@@ -2932,11 +3097,92 @@
       '';
 
 
+    setPracticeCardCount(
+      word.correct.length
+    );
+
+
     renderPracticeSlots();
+
 
     renderPracticeChoices();
 
+
     updatePracticeNavigation();
+  }
+
+
+  function setPracticeCardCount(
+    count
+  ) {
+
+    const safeCount =
+      Math.max(
+        count,
+        1
+      );
+
+
+    const slots =
+      document.getElementById(
+        'practiceSlots'
+      );
+
+
+    const choices =
+      document.getElementById(
+        'practiceChoices'
+      );
+
+
+    if (slots) {
+
+      slots.style.setProperty(
+        '--practice-card-count',
+        safeCount
+      );
+    }
+
+
+    if (choices) {
+
+      choices.style.setProperty(
+        '--practice-card-count',
+        safeCount
+      );
+    }
+  }
+
+
+  function practiceCardsMatch(
+    chosenCard,
+    expectedCard
+  ) {
+
+    if (
+      !chosenCard ||
+      !expectedCard
+    ) {
+
+      return false;
+    }
+
+
+    return (
+      String(
+        chosenCard.text
+      ) ===
+      String(
+        expectedCard.text
+      )
+      &&
+      String(
+        chosenCard.colour
+      ) ===
+      String(
+        expectedCard.colour
+      )
+    );
   }
 
 
@@ -2972,6 +3218,10 @@
 
         slot.className =
           `practice-slot ${correctCard.colour}`;
+
+
+        slot.dataset.slotIndex =
+          slotIndex;
 
 
         const placedCard =
@@ -3050,7 +3300,7 @@
 
 
         button.className =
-          `choice-card sound-card ${card.colour}`;
+          `sound-card ${card.colour}`;
 
 
         button.textContent =
@@ -3062,7 +3312,8 @@
           () => {
 
             placePracticeCard(
-              cardIndex
+              cardIndex,
+              button
             );
           }
         );
@@ -3077,7 +3328,8 @@
 
 
   function placePracticeCard(
-    availableIndex
+    availableIndex,
+    button
   ) {
 
     const emptySlot =
@@ -3088,23 +3340,56 @@
 
 
     if (
-      emptySlot === -1
+      emptySlot ===
+      -1
     ) {
 
       return;
     }
 
 
-    const card =
+    const word =
+      games[
+        practiceGameIndex
+      ]
+      .words[
+        practiceWordIndex
+      ];
+
+
+    const chosenCard =
       practiceAvailableCards[
         availableIndex
       ];
 
 
+    const expectedCard =
+      word.correct[
+        emptySlot
+      ];
+
+
+    if (
+      !practiceCardsMatch(
+        chosenCard,
+        expectedCard
+      )
+    ) {
+
+      showWrongPracticeCard(
+        button,
+        emptySlot
+      );
+
+
+      return;
+    }
+
+
     practiceSelected[
       emptySlot
     ] =
-      card;
+      chosenCard;
 
 
     practiceAvailableCards.splice(
@@ -3113,9 +3398,117 @@
     );
 
 
+    document.getElementById(
+      'practiceMessage'
+    )
+    .textContent =
+      '';
+
+
     renderPracticeSlots();
 
+
     renderPracticeChoices();
+
+
+    if (
+      practiceSelected.every(
+        card =>
+          card !== null
+      )
+    ) {
+
+      document.getElementById(
+        'practiceMessage'
+      )
+      .textContent =
+        '⭐ Word built! You can move to the next word.';
+    }
+  }
+
+
+  function showWrongPracticeCard(
+    button,
+    slotIndex
+  ) {
+
+    if (
+      button
+    ) {
+
+      button.classList.remove(
+        'practice-wrong'
+      );
+
+
+      void button.offsetWidth;
+
+
+      button.classList.add(
+        'practice-wrong'
+      );
+
+
+      setTimeout(
+        () => {
+
+          button.classList.remove(
+            'practice-wrong'
+          );
+
+        },
+        500
+      );
+    }
+
+
+    const slots =
+      document.getElementById(
+        'practiceSlots'
+      );
+
+
+    const slot =
+      slots?.children[
+        slotIndex
+      ];
+
+
+    if (
+      slot
+    ) {
+
+      slot.classList.remove(
+        'practice-slot-wrong'
+      );
+
+
+      void slot.offsetWidth;
+
+
+      slot.classList.add(
+        'practice-slot-wrong'
+      );
+
+
+      setTimeout(
+        () => {
+
+          slot.classList.remove(
+            'practice-slot-wrong'
+          );
+
+        },
+        500
+      );
+    }
+
+
+    document.getElementById(
+      'practiceMessage'
+    )
+    .textContent =
+      'Try another sound card.';
   }
 
 
@@ -3148,7 +3541,15 @@
     );
 
 
+    document.getElementById(
+      'practiceMessage'
+    )
+    .textContent =
+      '';
+
+
     renderPracticeSlots();
+
 
     renderPracticeChoices();
   }
@@ -3163,10 +3564,12 @@
   function previousPracticeWord() {
 
     if (
-      practiceWordIndex > 0
+      practiceWordIndex >
+      0
     ) {
 
       practiceWordIndex--;
+
 
       renderPracticeWord();
     }
@@ -3183,10 +3586,12 @@
 
     if (
       practiceWordIndex <
-      game.words.length - 1
+      game.words.length -
+      1
     ) {
 
       practiceWordIndex++;
+
 
       renderPracticeWord();
     }
@@ -3214,12 +3619,14 @@
 
 
     previousButton.disabled =
-      practiceWordIndex === 0;
+      practiceWordIndex ===
+      0;
 
 
     nextButton.disabled =
       practiceWordIndex ===
-      game.words.length - 1;
+      game.words.length -
+      1;
   }
 
 
@@ -3236,12 +3643,14 @@
       games[
         gameIndex
       ]
-      .words.length === 0
+      .words.length ===
+      0
     ) {
 
       alert(
         'This game does not have any words yet.'
       );
+
 
       return;
     }
@@ -3611,7 +4020,8 @@
 
 
     if (
-      chosen === expected
+      chosen ===
+      expected
     ) {
 
       const tries =
@@ -3642,6 +4052,7 @@
 
       finishChildWord();
 
+
       return;
     }
 
@@ -3650,7 +4061,8 @@
 
 
     if (
-      childAttempts === 1
+      childAttempts ===
+      1
     ) {
 
       feedback.textContent =
@@ -3796,7 +4208,8 @@
 
     if (
       childWordIndex <
-      game.words.length - 1
+      game.words.length -
+      1
     ) {
 
       childWordIndex++;
@@ -3804,11 +4217,13 @@
 
       renderChildWord();
 
+
       return;
     }
 
 
     saveCurrentResults();
+
 
     renderResults();
 
@@ -3858,6 +4273,7 @@
 
     renderResults();
 
+
     showScreen(
       'resultsScreen'
     );
@@ -3883,7 +4299,8 @@
     if (
       !saved ||
       !saved.results ||
-      saved.results.length === 0
+      saved.results.length ===
+      0
     ) {
 
       container.innerHTML = `
@@ -3893,6 +4310,7 @@
         </div>
 
       `;
+
 
       return;
     }
@@ -4075,6 +4493,7 @@
 
     renderEditGameList();
 
+
     showScreen(
       'createScreen'
     );
@@ -4090,11 +4509,13 @@
 
 
     if (
-      games.length === 0
+      games.length ===
+      0
     ) {
 
       container.innerHTML =
         '<div class="card">No games yet. Create your first spelling game.</div>';
+
 
       return;
     }
@@ -4152,12 +4573,14 @@
   function createNewGame() {
 
     if (
-      games.length >= 20
+      games.length >=
+      20
     ) {
 
       alert(
         'You can save up to 20 spelling games.'
       );
+
 
       return;
     }
@@ -4183,7 +4606,8 @@
 
 
     currentGameIndex =
-      games.length - 1;
+      games.length -
+      1;
 
 
     openEditor(
@@ -4213,7 +4637,8 @@
 
 
     for (
-      const word of game.words
+      const word of
+      game.words
     ) {
 
       try {
@@ -4229,7 +4654,9 @@
 
       } catch (error) {
 
-        console.error(error);
+        console.error(
+          error
+        );
       }
     }
 
@@ -4241,6 +4668,7 @@
 
 
     saveGames();
+
 
     renderEditGameList();
   }
@@ -4293,6 +4721,7 @@
         'Please enter a game name.'
       );
 
+
       return;
     }
 
@@ -4321,12 +4750,14 @@
 
 
     if (
-      game.words.length >= 20
+      game.words.length >=
+      20
     ) {
 
       alert(
         'You can add up to 20 words to a game.'
       );
+
 
       return;
     }
@@ -4358,13 +4789,15 @@
 
 
     renderWordEditor(
-      game.words.length - 1
+      game.words.length -
+      1
     );
   }
 
 
   function renderWordEditor(
-    openIndex = -1
+    openIndex =
+      -1
   ) {
 
     const game =
@@ -4388,7 +4821,8 @@
 
 
     if (
-      game.words.length === 0
+      game.words.length ===
+      0
     ) {
 
       container.innerHTML = `
@@ -4402,6 +4836,7 @@
         </div>
 
       `;
+
 
       return;
     }
@@ -4846,7 +5281,8 @@
   ) {
 
     if (
-      cards.length === 0
+      cards.length ===
+      0
     ) {
 
       return `
@@ -4935,7 +5371,8 @@
 
 
     for (
-      const word of game.words
+      const word of
+      game.words
     ) {
 
       const pictureFound =
@@ -5051,7 +5488,8 @@
 
     if (
       !files ||
-      files.length === 0
+      files.length ===
+      0
     ) {
 
       return;
@@ -5083,7 +5521,8 @@
 
 
     for (
-      const item of items
+      const item of
+      items
     ) {
 
       if (
@@ -5139,6 +5578,7 @@
         'Please choose, drop or paste an image file.'
       );
 
+
       return;
     }
 
@@ -5168,7 +5608,9 @@
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
 
 
       alert(
@@ -5196,7 +5638,9 @@
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
     }
   }
 
@@ -5228,7 +5672,8 @@
 
 
     for (
-      const type of options
+      const type of
+      options
     ) {
 
       if (
@@ -5262,6 +5707,7 @@
         'Please stop the current recording first.'
       );
 
+
       return;
     }
 
@@ -5276,6 +5722,7 @@
       alert(
         'Voice recording is not supported by this browser.'
       );
+
 
       return;
     }
@@ -5386,7 +5833,8 @@
 
           if (
             event.data &&
-            event.data.size > 0
+            event.data.size >
+            0
           ) {
 
             activeRecordingChunks.push(
@@ -5424,7 +5872,8 @@
           try {
 
             if (
-              blob.size > 0
+              blob.size >
+              0
             ) {
 
               await saveAudioBlob(
@@ -5446,7 +5895,9 @@
 
           } catch (error) {
 
-            console.error(error);
+            console.error(
+              error
+            );
 
 
             alert(
@@ -5519,7 +5970,9 @@
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
 
 
       stopMicrophoneStream();
@@ -5581,8 +6034,10 @@
       activeRecordingStream
         .getTracks()
         .forEach(
-          track =>
-            track.stop()
+          track => {
+
+            track.stop();
+          }
         );
 
 
@@ -5610,7 +6065,9 @@
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
     }
   }
 
@@ -5818,6 +6275,7 @@
         'Please type something on the card first.'
       );
 
+
       return;
     }
 
@@ -5934,7 +6392,9 @@
 
     } catch (error) {
 
-      console.error(error);
+      console.error(
+        error
+      );
     }
 
 
@@ -6248,7 +6708,8 @@
 
 
     if (
-      chosen === expected
+      chosen ===
+      expected
     ) {
 
       feedback.textContent =
@@ -6265,10 +6726,12 @@
   function previousPreviewWord() {
 
     if (
-      currentPreviewWordIndex > 0
+      currentPreviewWordIndex >
+      0
     ) {
 
       currentPreviewWordIndex--;
+
 
       renderPreview();
     }
@@ -6285,10 +6748,12 @@
 
     if (
       currentPreviewWordIndex <
-      game.words.length - 1
+      game.words.length -
+      1
     ) {
 
       currentPreviewWordIndex++;
+
 
       renderPreview();
     }
