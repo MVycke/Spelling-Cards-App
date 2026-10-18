@@ -559,25 +559,37 @@
 
     .practice-slots {
       width: 100%;
+
       display: grid;
+
       grid-template-columns:
         repeat(
           var(--practice-card-count, 1),
           minmax(0, 1fr)
         );
-      gap: clamp(4px, 1.2vw, 12px);
+
+      gap: clamp(3px, 0.7vw, 10px);
+
       margin: 18px 0 28px;
     }
 
     .practice-slot {
       min-width: 0;
-      min-height: clamp(56px, 8vw, 74px);
-      border-radius: 14px;
+
+      min-height: clamp(54px, 7vw, 74px);
+
+      border-radius: clamp(7px, 1.2vw, 14px);
+
       border: 3px dashed;
+
       display: flex;
+
       align-items: center;
+
       justify-content: center;
+
       cursor: pointer;
+
       overflow: hidden;
     }
 
@@ -614,38 +626,71 @@
       width: 100%;
       min-width: 0;
       min-height: 100%;
-      padding:
-        clamp(7px, 1.4vw, 14px)
-        clamp(4px, 1vw, 12px);
-      border-radius: 10px;
+
+      padding: 6px 3px;
+
+      border-radius: clamp(6px, 1vw, 11px);
+
       border: none;
-      font-size:
-        clamp(14px, 2.6vw, 22px);
-      overflow-wrap: anywhere;
+
+      font-size: var(--practice-font-size, 22px);
+
+      white-space: nowrap;
+
+      overflow: hidden;
+
+      text-overflow: clip;
+
+      line-height: 1;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
     }
 
     .practice-choice-area {
       width: 100%;
+
       display: grid;
+
       grid-template-columns:
         repeat(
           var(--practice-card-count, 1),
           minmax(0, 1fr)
         );
-      gap: clamp(4px, 1.2vw, 12px);
+
+      gap: clamp(3px, 0.7vw, 10px);
+
       margin: 22px 0;
     }
 
     .practice-choice-area .sound-card {
       width: 100%;
       min-width: 0;
-      min-height: clamp(56px, 8vw, 74px);
-      padding:
-        clamp(7px, 1.4vw, 14px)
-        clamp(4px, 1vw, 12px);
-      font-size:
-        clamp(14px, 2.6vw, 22px);
-      overflow-wrap: anywhere;
+
+      min-height: clamp(54px, 7vw, 74px);
+
+      padding: 6px 3px;
+
+      border-radius: clamp(7px, 1.2vw, 12px);
+
+      font-size: var(--practice-font-size, 22px);
+
+      white-space: nowrap;
+
+      overflow: hidden;
+
+      text-overflow: clip;
+
+      line-height: 1;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
     }
 
     .practice-navigation {
@@ -665,14 +710,12 @@
     }
 
     .practice-wrong {
-      animation:
-        practiceShake 0.42s ease;
+      animation: practiceShake 0.42s ease;
       outline: 3px solid #e07a7a;
     }
 
     .practice-slot-wrong {
-      animation:
-        slotWrongFlash 0.42s ease;
+      animation: slotWrongFlash 0.42s ease;
     }
 
     @keyframes practiceShake {
@@ -705,15 +748,21 @@
     @keyframes slotWrongFlash {
 
       0% {
-        box-shadow: 0 0 0 0 rgba(220, 80, 80, 0);
+        box-shadow:
+          0 0 0 0
+          rgba(220, 80, 80, 0);
       }
 
       50% {
-        box-shadow: 0 0 0 5px rgba(220, 80, 80, 0.28);
+        box-shadow:
+          0 0 0 5px
+          rgba(220, 80, 80, 0.28);
       }
 
       100% {
-        box-shadow: 0 0 0 0 rgba(220, 80, 80, 0);
+        box-shadow:
+          0 0 0 0
+          rgba(220, 80, 80, 0);
       }
     }
 
@@ -892,6 +941,7 @@
         <h3>
           Build the word
         </h3>
+
 
         <div class="practice-row-wrap">
 
@@ -1316,7 +1366,7 @@
 
         <div class="help-step">
           ↩️ <strong>Try another card</strong><br>
-          If a card does not belong there, it will stay in the pile.
+          If a card does not belong there, it stays in the pile.
         </div>
 
         <div class="help-step">
@@ -1357,7 +1407,7 @@
 
         <div class="help-step">
           <strong>6. Practice Words</strong><br>
-          Practice mode uses only the correct cards. A card only stays if it belongs in that position.
+          Practice mode uses only correct cards. A card only stays if it belongs in that position.
         </div>
 
         <div class="help-step">
@@ -2441,68 +2491,6 @@
               }
 
             ]
-          },
-
-
-          {
-            id:
-              makeId(
-                'word'
-              ),
-
-            word:
-              'farm',
-
-            hint:
-              'A place where animals or crops may be raised.',
-
-            correct: [
-
-              {
-                text:
-                  'f',
-
-                colour:
-                  'green'
-              },
-
-              {
-                text:
-                  'ar',
-
-                colour:
-                  'purple'
-              },
-
-              {
-                text:
-                  'm',
-
-                colour:
-                  'pink'
-              }
-
-            ],
-
-            extra: [
-
-              {
-                text:
-                  'b',
-
-                colour:
-                  'green'
-              },
-
-              {
-                text:
-                  'a',
-
-                colour:
-                  'purple'
-              }
-
-            ]
           }
 
         ]
@@ -3109,6 +3097,11 @@
 
 
     updatePracticeNavigation();
+
+
+    requestAnimationFrame(
+      fitPracticeCardText
+    );
   }
 
 
@@ -3121,6 +3114,50 @@
         count,
         1
       );
+
+
+    let startingFont =
+      22;
+
+
+    if (
+      safeCount >=
+      8
+    ) {
+
+      startingFont =
+        18;
+    }
+
+
+    if (
+      safeCount >=
+      11
+    ) {
+
+      startingFont =
+        16;
+    }
+
+
+    if (
+      safeCount >=
+      14
+    ) {
+
+      startingFont =
+        14;
+    }
+
+
+    if (
+      safeCount >=
+      17
+    ) {
+
+      startingFont =
+        12;
+    }
 
 
     const slots =
@@ -3141,6 +3178,12 @@
         '--practice-card-count',
         safeCount
       );
+
+
+      slots.style.setProperty(
+        '--practice-font-size',
+        `${startingFont}px`
+      );
     }
 
 
@@ -3150,7 +3193,63 @@
         '--practice-card-count',
         safeCount
       );
+
+
+      choices.style.setProperty(
+        '--practice-font-size',
+        `${startingFont}px`
+      );
     }
+  }
+
+
+  function fitPracticeCardText() {
+
+    const cards =
+      document.querySelectorAll(
+        '#practiceSlots .sound-card, #practiceChoices .sound-card'
+      );
+
+
+    cards.forEach(
+      card => {
+
+        let size =
+          parseFloat(
+            window
+              .getComputedStyle(
+                card
+              )
+              .fontSize
+          );
+
+
+        const minimumSize =
+          8;
+
+
+        while (
+          size >
+            minimumSize
+          &&
+          (
+            card.scrollWidth >
+              card.clientWidth
+            ||
+            card.scrollHeight >
+              card.clientHeight
+          )
+        ) {
+
+          size -=
+            1;
+
+
+          card.style.fontSize =
+            `${size}px`;
+        }
+      }
+    );
   }
 
 
@@ -3220,10 +3319,6 @@
           `practice-slot ${correctCard.colour}`;
 
 
-        slot.dataset.slotIndex =
-          slotIndex;
-
-
         const placedCard =
           practiceSelected[
             slotIndex
@@ -3275,6 +3370,11 @@
         );
       }
     );
+
+
+    requestAnimationFrame(
+      fitPracticeCardText
+    );
   }
 
 
@@ -3324,6 +3424,11 @@
         );
       }
     );
+
+
+    requestAnimationFrame(
+      fitPracticeCardText
+    );
   }
 
 
@@ -3335,7 +3440,8 @@
     const emptySlot =
       practiceSelected.findIndex(
         card =>
-          card === null
+          card ===
+          null
       );
 
 
@@ -3414,7 +3520,8 @@
     if (
       practiceSelected.every(
         card =>
-          card !== null
+          card !==
+          null
       )
     ) {
 
@@ -6771,6 +6878,35 @@
       'editorScreen'
     );
   }
+
+
+
+  /*
+    Re-check Practice card text if the window size changes.
+    This helps when rotating a tablet or resizing the browser.
+  */
+
+  window.addEventListener(
+    'resize',
+    function() {
+
+      if (
+        !document
+          .getElementById(
+            'practiceScreen'
+          )
+          .classList
+          .contains(
+            'hidden'
+          )
+      ) {
+
+        renderPracticeSlots();
+
+        renderPracticeChoices();
+      }
+    }
+  );
 
 </script>
 
